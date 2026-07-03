@@ -8,8 +8,24 @@ describe('migrations', () => {
     const db = openDb(':memory:')
     const first = runMigrations(db)
     expect(first.applied).toContain('0001_init.sql')
+    expect(first.applied).toContain('0002_ev_runs.sql')
     const second = runMigrations(db)
     expect(second.applied).toEqual([])
+
+    const evRunCols = (db.prepare(`PRAGMA table_info(ev_runs)`).all() as { name: string }[]).map(
+      (c) => c.name,
+    )
+    for (const col of [
+      'scenario',
+      'prob_break_even',
+      'prob_top_prize',
+      'prob_ev_above_price',
+      'ev_mean_cents',
+      'iterations',
+      'seed',
+    ]) {
+      expect(evRunCols).toContain(col)
+    }
 
     const tables = db
       .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`)

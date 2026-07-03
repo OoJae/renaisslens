@@ -161,3 +161,40 @@ export interface TierBucket {
   min_fmv_cents: number
   max_fmv_cents: number
 }
+
+export interface EvRunRow {
+  id: number
+  pack_slug: string
+  scenario: string
+  p10_cents: number | null
+  p50_cents: number | null
+  p90_cents: number | null
+  prob_break_even: number | null
+  prob_top_prize: number | null
+  prob_ev_above_price: number | null
+  ev_mean_cents: number | null
+  iterations: number | null
+  seed: number | null
+  params_json: string
+  assumptions_json: string
+  input_snapshot_ids: string | null
+  ran_at: string
+}
+
+export interface NewEvRun {
+  packSlug: string
+  scenario: string
+  p10Cents: number
+  p50Cents: number
+  p90Cents: number
+  probBreakEven: number | null
+  probTopPrize: number | null
+  probEvAbovePrice: number
+  evMeanCents: number
+  iterations: number
+  seed: number
+  paramsJson: string
+  assumptionsJson: string
+  /** JSON array of snapshot ids — the provenance chain for every EV number */
+  inputSnapshotIdsJson?: string | null
+}

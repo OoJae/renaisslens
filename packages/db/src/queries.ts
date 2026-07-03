@@ -1,7 +1,9 @@
 import type { Database } from 'better-sqlite3'
 import type {
   DataMode,
+  EvRunRow,
   ListingRow,
+  NewEvRun,
   NewListing,
   NewPack,
   NewPull,
@@ -133,9 +135,21 @@ export function insertPullsDedup(
 }
 
 export function latestPulls(db: Database, slug: string, limit: number): PullRow[] {
+  // secondary key id DESC makes the LIMIT cutoff deterministic when many pulls
+  // share a pulled_at second (common — the feed stamps whole seconds), so the
+  // window fed to the EV engine is stable per data state.
   return db
-    .prepare(`SELECT * FROM pack_pulls WHERE pack_slug = ? ORDER BY pulled_at DESC LIMIT ?`)
+    .prepare(
+      `SELECT * FROM pack_pulls WHERE pack_slug = ? ORDER BY pulled_at DESC, id DESC LIMIT ?`,
+    )
     .all(slug, limit) as PullRow[]
+}
+
+export function countPullsForPack(db: Database, slug: string): number {
+  const row = db.prepare(`SELECT COUNT(*) AS n FROM pack_pulls WHERE pack_slug = ?`).get(slug) as {
+    n: number
+  }
+  return row.n
 }
 
 export function tierDistribution(db: Database, slug: string): TierBucket[] {
@@ -177,7 +191,13 @@ export function upsertListing(db: Database, l: NewListing, snapshotId: number, n
     db.prepare(
       `INSERT INTO listing_history (token_id, ask_price_cents, fmv_cents, observed_at, snapshot_id)
        VALUES (@tokenId, @askPriceCents, @fmvCents, @now, @snapshotId)`,
-    ).run({ tokenId: l.tokenId, askPriceCents: l.askPriceCents, fmvCents: l.fmvCents, now, snapshotId })
+    ).run({
+      tokenId: l.tokenId,
+      askPriceCents: l.askPriceCents,
+      fmvCents: l.fmvCents,
+      now,
+      snapshotId,
+    })
   }
 }
 
@@ -193,6 +213,24 @@ export function mispricedListings(db: Database, minRatio: number, limit = 50): L
        LIMIT @limit`,
     )
     .all({ minRatio, limit }) as ListingRow[]
+}
+
+/** Median ask/FMV across listings with both prices — a context stat for the EV haircut assumption. */
+export function medianAskToFmvRatio(db: Database): number | null {
+  const rows = db
+    .prepare(
+      `SELECT CAST(ask_price_cents AS REAL) / fmv_cents AS ratio
+       FROM listings
+       WHERE ask_price_cents IS NOT NULL AND fmv_cents IS NOT NULL AND fmv_cents > 0
+       ORDER BY ratio`,
+    )
+    .all() as { ratio: number }[]
+  const ratios = rows.map((r) => r.ratio)
+  const mid = Math.floor(ratios.length / 2)
+  const hi = ratios[mid]
+  if (hi === undefined) return null
+  const lo = ratios[mid - 1]
+  return ratios.length % 2 === 1 || lo === undefined ? hi : (lo + hi) / 2
 }
 
 // ── sales ────────────────────────────────────────────────────────────────────
@@ -224,6 +262,33 @@ export function recentSales(db: Database, limit: number): SaleRow[] {
   return db
     .prepare(`SELECT * FROM sales ORDER BY COALESCE(sold_at, observed_at) DESC LIMIT ?`)
     .all(limit) as SaleRow[]
+}
+
+// ── ev runs ──────────────────────────────────────────────────────────────────
+
+export function insertEvRun(db: Database, r: NewEvRun, now: string): number {
+  const res = db
+    .prepare(
+      `INSERT INTO ev_runs (pack_slug, scenario, p10_cents, p50_cents, p90_cents,
+                            prob_break_even, prob_top_prize, prob_ev_above_price, ev_mean_cents,
+                            iterations, seed, params_json, assumptions_json, input_snapshot_ids, ran_at)
+       VALUES (@packSlug, @scenario, @p10Cents, @p50Cents, @p90Cents,
+               @probBreakEven, @probTopPrize, @probEvAbovePrice, @evMeanCents,
+               @iterations, @seed, @paramsJson, @assumptionsJson, @inputSnapshotIdsJson, @now)`,
+    )
+    .run({ inputSnapshotIdsJson: null, ...r, now })
+  return Number(res.lastInsertRowid)
+}
+
+/** Newest run per (pack, scenario) — THE dashboard read path. Runs are history; reads are latest. */
+export function latestEvRuns(db: Database): EvRunRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM ev_runs
+       WHERE id IN (SELECT MAX(id) FROM ev_runs GROUP BY pack_slug, scenario)
+       ORDER BY pack_slug ASC, scenario ASC`,
+    )
+    .all() as EvRunRow[]
 }
 
 // ── source status / freshness ────────────────────────────────────────────────
