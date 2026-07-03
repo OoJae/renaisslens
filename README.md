@@ -32,9 +32,14 @@ strictly optional: without an `ANTHROPIC_API_KEY` in the environment the button 
 and `POST /api/explain` returns a friendly 503 — the keyless demo is unaffected. The model only
 receives the numbers already shown on the page (never a single-point EV), must label
 assumptions, refuses buy/sell advice, and its output always ends with a not-financial-advice
-caveat that the server enforces. Default model `claude-opus-4-8` (override with
-`RENAISSLENS_EXPLAINER_MODEL`); a rough cost is $0.03–$0.10 per uncached click — repeat clicks
-are served from an in-memory cache until the next EV run changes the data.
+caveat that the server enforces. Repeat clicks are served from an in-memory cache until the next
+EV run changes the data.
+
+The explainer speaks the Anthropic API protocol, so it works against Anthropic (default) or any
+compatible provider. Configure with three env vars: `ANTHROPIC_API_KEY` (the endpoint's key),
+`RENAISSLENS_EXPLAINER_MODEL` (default `claude-opus-4-8`), and `RENAISSLENS_EXPLAINER_BASE_URL`
+(default Anthropic). For example, to use Xiaomi MiMo: model `mimo-v2.5-pro`, base URL
+`https://token-plan-sgp.xiaomimimo.com/anthropic`.
 
 ## Screenshots
 

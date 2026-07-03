@@ -81,13 +81,18 @@ export async function POST(request: Request) {
     })
   }
 
-  // 6. the Claude call — no sampling params (400 on Opus 4.8), no prefill
+  // 6. the LLM call. The endpoint speaks the Anthropic protocol; base URL is
+  // configurable so this works against Anthropic (default) or any compatible
+  // provider (e.g. Xiaomi MiMo). No sampling params, no prefill, and no
+  // `thinking` param — the latter is Claude-4.x-specific and a compatible
+  // endpoint may reject it; a 250-word explanation of precomputed numbers
+  // doesn't need it.
   try {
-    const client = new Anthropic()
+    const baseURL = process.env.RENAISSLENS_EXPLAINER_BASE_URL?.trim() || undefined
+    const client = new Anthropic({ baseURL })
     const response = await client.messages.create({
       model,
       max_tokens: 1024,
-      thinking: { type: 'adaptive' },
       system: EXPLAINER_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildExplainUserMessage(detail.input) }],
     })
