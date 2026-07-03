@@ -20,7 +20,8 @@ No env vars needed — the dashboard boots offline from committed sample snapsho
 | `pnpm scrape` | One polite live ingestion cycle (Renaiss public API + homepage feed) |
 | `pnpm scrape:mock` | Load committed demo snapshots into the DB — zero network |
 | `pnpm scrape:watch` | Continuous ingestion loop (packs/feed ~30min, marketplace ~6h) |
-| `pnpm test` | Unit tests (money conversion, parsers, loaders, RNG determinism) |
+| `pnpm ev:run` | Compute EV ranges (all packs × scenarios) from current DB state — zero network |
+| `pnpm test` | Unit tests (money conversion, parsers, loaders, EV engine round-trips, RNG determinism) |
 | `pnpm lint` / `pnpm typecheck` | Biome + `tsc --noEmit` |
 | `pnpm db:migrate` / `pnpm db:reset` | Apply migrations / wipe + rebuild from demo snapshots |
 

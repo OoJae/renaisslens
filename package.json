@@ -13,6 +13,7 @@
     "scrape": "pnpm --filter @renaisslens/scraper scrape",
     "scrape:mock": "pnpm --filter @renaisslens/scraper scrape:mock",
     "scrape:watch": "pnpm --filter @renaisslens/scraper scrape:watch",
+    "ev:run": "pnpm --filter @renaisslens/scraper ev",
     "codegen:api": "pnpm --filter @renaisslens/scraper codegen",
     "snapshots:prune": "pnpm --filter @renaisslens/scraper prune",
     "db:migrate": "pnpm --filter @renaisslens/db migrate",

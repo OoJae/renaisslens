@@ -1,6 +1,6 @@
 # Methodology
 
-_This document mirrors the in-app Methodology page. It is the single source of truth for how RenaissLens collects data, what it assumes, and what it cannot know._
+_This document is the single source of truth for how RenaissLens collects data, what it assumes, and what it cannot know. It is linked from the dashboard; an in-app Methodology page mirroring it ships in a later milestone._
 
 ## Data sources & collection
 
@@ -30,11 +30,36 @@ Fields named `*InUSDT` are 18-decimal wei strings of USDT dollars; fields named 
 
 ## EV model & labeled assumptions
 
-_(Milestone 2 — mixture distributions anchored on observed pulls, pack price, featured-card FMV, and marketplace FMV distribution; sensitivity across pool-assumption scenarios.)_
+We do not know Renaiss's true odds or pool composition, so the engine models the odds themselves as uncertain instead of pretending to know them.
+
+**Pool model (per pack).** Observed pulls are grouped by their verbatim tier label into a mixture. Tier probabilities get a Dirichlet posterior over the observed counts (Jeffreys-style pseudo-count 0.5, so small samples widen the range rather than sharpen it); tier values are bootstrap-resampled from the observed FMVs. The advertised top prize is deliberately **not** a tier: no observed pull has ever reached it, so its probability is an explicit **assumption** — a log-uniform odds band, never an inference. The middle of the distribution is observed; the tail is assumed and labeled. Marketplace listings do **not** enter the pool model; they contribute one inferred context stat (median ask/FMV) that motivates — but does not determine — the FMV haircut.
+
+**Scenarios.** Every run sweeps five named scenarios, each nothing but a list of labeled assumptions (the engine reads its parameters back out of that list, so the assumptions panel always shows exactly what ran):
+
+| scenario | feed-bias ÷ | FMV haircut | top-prize odds band | role |
+|---|---|---|---|---|
+| `as-observed` | 1 | 1.00 | off | pull feed at face value — likely too rosy; display only |
+| `generous` | 1 | 1.00 | 1/1000 – 1/500 | feed complete and unbiased, FMV fully realizable |
+| `neutral` | 2 | 0.90 | 1/3000 – 1/1000 | **headline scenario** |
+| `house-favored` | 5 | 0.80 | 1/10000 – 1/3000 | feed curated toward hits; consistent with the 10–40% reference-class hold band |
+| `reference-prior` | — | — | — | ignores our data entirely: EV = price × (1 − hold), hold ~ U(0.10, 0.40); contrast only |
+
+The feed-bias factor divides the observed counts of "hit" tiers (mean FMV ≥ 1.5× pack price) before the posterior is built — it models the possibility that limitation #1's feed curation over-shows big pulls. The haircut discounts Renaiss-assigned FMV toward realizable value (limitation #4).
+
+**Verdict rule.** With fewer than 20 observed pulls, the verdict is `insufficient data` and no range is published at all. Otherwise: `+EV likely` requires P(EV > price) ≥ 80% under `neutral` **and** ≥ 50% under `house-favored`; `−EV likely` requires P(EV > price) ≤ 20% under `neutral` **and** ≤ 50% under `generous`; anything in between is `uncertain`. The badge never reads +/−EV unless the skeptical scenario agrees.
+
+**Known degeneracy:** a tier observed only once bootstraps to a constant; its uncertainty is carried by the Dirichlet weight, not the value spread. This is disclosed rather than patched.
 
 ## Monte Carlo approach
 
-_(Milestone 2 — 100k simulated pulls per scenario; P10/P50/P90; P(pull ≥ pack price); P(top prize).)_
+100,000 iterations per scenario, two layers per iteration:
+
+1. **Parameter layer** — redraw tier weights (Dirichlet), tier means (bootstrap), and top-prize probability (log-uniform band), then compute that draw's exact EV. **P10/P50/P90 are percentiles of this EV distribution** — a credible range for the pack's expected payout, not single-pull luck — and P(EV > price) from the same samples drives the verdict.
+2. **Pull layer** — simulate one pull from the same parameter draw, giving P(pull ≥ pack price), P(top prize), and the pull-value histogram.
+
+The `reference-prior` contrast scenario is single-layer by design: it applies a house-edge band to the pack price and models no individual pull, so its P(break even) and P(top prize) are stored as `null` (not modeled) rather than a fabricated `0`, and its histogram shows the EV spread rather than pull values.
+
+Every run persists to `ev_runs` with its full scenario parameters, assumption list, and `input_snapshot_ids` — the exact raw snapshots that fed the model — so every published range traces back to bytes on disk. Seeds derive from `pack | scenario | input snapshot ids`: the same data state always publishes the identical range.
 
 ## Seeded RNG & reproducibility
 
