@@ -128,6 +128,9 @@ export function runEv(opts: { db?: Database; pack?: string; iterations?: number 
                 },
                 verdict,
                 histogram: r.histogram,
+                // 'pull' = single-pull values; 'ev' = EV spread (reference-prior)
+                // — the UI captions the histogram axis from this
+                histogramOf: r.histogramOf,
               }),
               assumptionsJson: JSON.stringify(r.assumptions),
               inputSnapshotIdsJson: JSON.stringify(snapshotIds),
