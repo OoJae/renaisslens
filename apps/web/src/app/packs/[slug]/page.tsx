@@ -14,30 +14,19 @@ import {
   type TierBucket,
   tierDistribution,
 } from '@renaisslens/db'
-import {
-  type Assumption,
-  HEADLINE_SCENARIO,
-  type HistogramBin,
-  MIN_PULLS_FOR_EV,
-  type Verdict,
-} from '@renaisslens/ev-engine'
+import { HEADLINE_SCENARIO, MIN_PULLS_FOR_EV, type Verdict } from '@renaisslens/ev-engine'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AssumptionsPanel } from '@/components/assumptions-panel'
+import { ExplainButton } from '@/components/explain-button'
 import { MonteCarloHistogram, type ScenarioHistogramData } from '@/components/monte-carlo-histogram'
 import { SensitivityTable } from '@/components/sensitivity-table'
 import { SlabBadge } from '@/components/slab-badge'
 import { usd } from '@/lib/format'
+import { type ScenarioRun, toScenarioRun } from '@/lib/pack-data'
 import { orderRuns, packEv } from '@/lib/verdict-ui'
 
 export const dynamic = 'force-dynamic'
-
-interface ScenarioRun {
-  row: EvRunRow
-  histogram: HistogramBin[] | null
-  histogramOf: 'pull' | 'ev' | null
-  assumptions: Assumption[] | null
-}
 
 type PackDetailResult =
   | { kind: 'no-db' }
@@ -54,50 +43,6 @@ type PackDetailResult =
       mode: DataMode
       capturedAt: string | null
     }
-
-/** Defensive JSON.parse — persisted blobs must degrade to section fallbacks, never crash a page. */
-function parseJson<T>(raw: string | null): T | null {
-  if (raw === null) return null
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return null
-  }
-}
-
-function parseHistogram(value: unknown): HistogramBin[] | null {
-  if (!Array.isArray(value)) return null
-  const bins = value.filter(
-    (b): b is HistogramBin =>
-      typeof b === 'object' &&
-      b !== null &&
-      Number.isFinite((b as HistogramBin).loCents) &&
-      Number.isFinite((b as HistogramBin).hiCents) &&
-      Number.isFinite((b as HistogramBin).count),
-  )
-  return bins.length > 0 ? bins : null
-}
-
-function parseAssumptions(raw: string): Assumption[] | null {
-  const value = parseJson<unknown>(raw)
-  if (!Array.isArray(value)) return null
-  const rows = value.filter(
-    (a): a is Assumption =>
-      typeof a === 'object' && a !== null && typeof (a as Assumption).name === 'string',
-  )
-  return rows.length > 0 ? rows : null
-}
-
-function toScenarioRun(row: EvRunRow): ScenarioRun {
-  const params = parseJson<{ histogram?: unknown; histogramOf?: unknown }>(row.params_json)
-  const of = params?.histogramOf
-  return {
-    row,
-    histogram: parseHistogram(params?.histogram),
-    histogramOf: of === 'pull' || of === 'ev' ? of : null,
-    assumptions: parseAssumptions(row.assumptions_json),
-  }
-}
 
 function readPackDetail(slug: string): PackDetailResult {
   let db: Database | undefined
@@ -150,6 +95,9 @@ export default function PackDetail({ params }: { params: { slug: string } }) {
   const { pack, runs, verdict, reason, pullCount, recentPulls, tiers, mode, capturedAt } = result
   const neutral = runs.find((r) => r.row.scenario === HEADLINE_SCENARIO)
   const insufficient = runs.length === 0 || pullCount < MIN_PULLS_FOR_EV
+  // env is server-only; only this boolean crosses the RSC boundary — a keyless
+  // deployment renders no explain section at all (.env.example contract)
+  const explainerConfigured = Boolean(process.env.ANTHROPIC_API_KEY?.trim())
 
   return (
     <div className="space-y-10">
@@ -258,13 +206,26 @@ export default function PackDetail({ params }: { params: { slug: string } }) {
                 <AssumptionsPanel assumptions={neutral.assumptions} />
                 <p className="mt-2 text-xs text-zinc-500">
                   Neutral-scenario inputs shown; the per-scenario knobs are in the sensitivity
-                  table. FMV figures are Renaiss&apos;s own valuations (see METHODOLOGY.md).
+                  table. FMV figures are Renaiss&apos;s own valuations (see the{' '}
+                  <Link href="/methodology" className="underline hover:text-zinc-300">
+                    methodology
+                  </Link>
+                  ).
                 </p>
               </>
             ) : (
               <p className="text-sm text-zinc-500">No assumptions recorded for this run.</p>
             )}
           </section>
+
+          {explainerConfigured && (
+            <section>
+              <h3 className="mb-3 font-display text-lg font-medium text-zinc-100">
+                Explain it like a collector
+              </h3>
+              <ExplainButton slug={pack.slug} />
+            </section>
+          )}
         </>
       )}
 
