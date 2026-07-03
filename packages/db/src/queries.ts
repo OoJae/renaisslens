@@ -2,7 +2,7 @@ import type { Database } from 'better-sqlite3'
 import type {
   DataMode,
   EvRunRow,
-  ListingRow,
+  ListingAnomalyRow,
   NewEvRun,
   NewListing,
   NewPack,
@@ -201,18 +201,29 @@ export function upsertListing(db: Database, l: NewListing, snapshotId: number, n
   }
 }
 
-/** Listings whose ask diverges from FMV by at least `minRatio` (both prices present). */
-export function mispricedListings(db: Database, minRatio: number, limit = 50): ListingRow[] {
+/**
+ * Listings whose ask diverges from Renaiss's FMV in EITHER direction, ranked
+ * by symmetric divergence max(ratio, 1/ratio). Surfaced as "listing anomaly"
+ * — transparency, never advice. (Replaces the one-directional
+ * mispricedListings, whose ask/fmv-DESC ordering starved the below-FMV side.)
+ */
+export function listingAnomalies(db: Database, minRatio: number, limit = 50): ListingAnomalyRow[] {
   return db
     .prepare(
-      `SELECT * FROM listings
-       WHERE ask_price_cents IS NOT NULL AND fmv_cents IS NOT NULL AND fmv_cents > 0
-         AND (CAST(ask_price_cents AS REAL) / fmv_cents >= @minRatio
-              OR CAST(fmv_cents AS REAL) / ask_price_cents >= @minRatio)
-       ORDER BY CAST(ask_price_cents AS REAL) / fmv_cents DESC
+      `SELECT *,
+         CAST(ask_price_cents AS REAL) / fmv_cents AS ratio,
+         MAX(CAST(ask_price_cents AS REAL) / fmv_cents,
+             CAST(fmv_cents AS REAL) / ask_price_cents) AS divergence,
+         CASE WHEN ask_price_cents >= fmv_cents THEN 'above-fmv' ELSE 'below-fmv' END AS direction
+       FROM listings
+       WHERE ask_price_cents IS NOT NULL AND fmv_cents IS NOT NULL
+         AND fmv_cents > 0 AND ask_price_cents > 0
+         AND MAX(CAST(ask_price_cents AS REAL) / fmv_cents,
+                 CAST(fmv_cents AS REAL) / ask_price_cents) >= @minRatio
+       ORDER BY divergence DESC
        LIMIT @limit`,
     )
-    .all({ minRatio, limit }) as ListingRow[]
+    .all({ minRatio, limit }) as ListingAnomalyRow[]
 }
 
 /** Median ask/FMV across listings with both prices — a context stat for the EV haircut assumption. */
@@ -262,6 +273,42 @@ export function recentSales(db: Database, limit: number): SaleRow[] {
   return db
     .prepare(`SELECT * FROM sales ORDER BY COALESCE(sold_at, observed_at) DESC LIMIT ?`)
     .all(limit) as SaleRow[]
+}
+
+/** Newest sale timestamp — the anchor for feed-relative windows (never wall-clock: demo data is fixed in time). */
+export function latestSaleAt(db: Database): string | null {
+  const row = db.prepare(`SELECT MAX(COALESCE(sold_at, observed_at)) AS t FROM sales`).get() as {
+    t: string | null
+  }
+  return row.t
+}
+
+/** Sales at/after the ISO cutoff. Filter/order use the exact idx_sales_time expression; id DESC pins tie order. */
+export function salesSince(db: Database, isoCutoff: string): SaleRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM sales WHERE COALESCE(sold_at, observed_at) >= ?
+       ORDER BY COALESCE(sold_at, observed_at) DESC, id DESC`,
+    )
+    .all(isoCutoff) as SaleRow[]
+}
+
+/**
+ * How much scrape history backs the sales feed — drives the honest-degradation
+ * copy: 1 snapshot → "a snapshot, not a trend"; more → "aggregated across N scrapes".
+ */
+export function salesBatchInfo(db: Database): {
+  snapshotCount: number
+  firstObservedAt: string | null
+  lastObservedAt: string | null
+} {
+  const row = db
+    .prepare(
+      `SELECT COUNT(DISTINCT snapshot_id) AS n, MIN(observed_at) AS first_at, MAX(observed_at) AS last_at
+       FROM sales`,
+    )
+    .get() as { n: number; first_at: string | null; last_at: string | null }
+  return { snapshotCount: row.n, firstObservedAt: row.first_at, lastObservedAt: row.last_at }
 }
 
 // ── ev runs ──────────────────────────────────────────────────────────────────

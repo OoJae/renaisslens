@@ -116,6 +116,16 @@ export interface NewListing {
   attributesJson: string | null
 }
 
+export type AnomalyDirection = 'above-fmv' | 'below-fmv'
+
+export interface ListingAnomalyRow extends ListingRow {
+  /** ask / fmv */
+  ratio: number
+  /** max(ratio, 1/ratio) — symmetric severity, both directions rank together */
+  divergence: number
+  direction: AnomalyDirection
+}
+
 export interface SaleRow {
   id: number
   activity_id: string

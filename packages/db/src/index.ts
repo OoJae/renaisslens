@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import { defaultDbPath, repoRoot, snapshotsRoot } from './paths'
 
+export * from './categories'
 export { runMigrations } from './migrate'
 export { openDb } from './open'
 export * from './queries'
