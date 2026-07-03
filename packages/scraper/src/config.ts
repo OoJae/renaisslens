@@ -4,7 +4,8 @@ export const CONFIG = {
   siteBaseUrl: process.env.RENAISS_SITE_URL ?? 'https://www.renaiss.xyz',
 
   // Politeness — self-imposed; the API publishes no rate limits (documented in METHODOLOGY.md)
-  userAgent: 'RenaissLens-Hackathon/1.0 (Renaiss Tech Hackathon S1 entry; contact: olamiyeoluwademilade@gmail.com)',
+  userAgent:
+    'RenaissLens-Hackathon/1.0 (Renaiss Tech Hackathon S1 entry; contact: olamiyeoluwademilade@gmail.com)',
   minIntervalMs: 2_000,
   apiTimeoutMs: 15_000,
   pageTimeoutMs: 30_000,

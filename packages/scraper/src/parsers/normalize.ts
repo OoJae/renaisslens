@@ -1,13 +1,13 @@
 import type { NewListing, NewPack, NewPull, NewSale } from '@renaisslens/db'
 import { extractActivities } from '../site/flight'
 import { usdCentsToInt, weiUsdtToCents } from './money'
+import type { Activity, MarketplaceItem, Pack, RecentPull } from './schemas'
 import {
   ActivitiesSchema,
   MarketplaceResponseSchema,
   PackDetailResponseSchema,
   PacksResponseSchema,
 } from './schemas'
-import type { Activity, MarketplaceItem, Pack, RecentPull } from './schemas'
 
 export function normalizePack(p: Pack): NewPack {
   return {
@@ -50,7 +50,8 @@ export function normalizeListing(item: MarketplaceItem): NewListing {
     vaultLocation: item.vaultLocation ?? null,
     ownerAddress: item.ownerAddress ?? null,
     ownerUsername: item.owner?.username ?? null,
-    askPriceCents: item.askPriceInUSDT === 'NO-ASK-PRICE' ? null : weiUsdtToCents(item.askPriceInUSDT),
+    askPriceCents:
+      item.askPriceInUSDT === 'NO-ASK-PRICE' ? null : weiUsdtToCents(item.askPriceInUSDT),
     askExpiresAt: item.askExpiresAt ?? null,
     fmvCents: item.fmvPriceInUSD === 'NO-FMV-PRICE' ? null : usdCentsToInt(item.fmvPriceInUSD),
     attributesJson: attributes != null ? JSON.stringify(attributes) : null,
@@ -58,7 +59,10 @@ export function normalizeListing(item: MarketplaceItem): NewListing {
 }
 
 export class ActivitiesShapeError extends Error {
-  constructor(message: string, readonly sample: unknown) {
+  constructor(
+    message: string,
+    readonly sample: unknown,
+  ) {
     super(`ActivitiesShapeError: ${message}`)
     this.name = 'ActivitiesShapeError'
   }
@@ -105,7 +109,8 @@ export function normalizeActivities(activities: Activity[]): NewSale[] {
       priceCents: weiUsdtToCents(stripFlightBigInt(a.value)),
       pctChange: a.priceChangePercentage ?? null,
       // an unparseable date must degrade to null, not crash past quarantine
-      soldAt: tsIso !== null && !Number.isNaN(Date.parse(tsIso)) ? new Date(tsIso).toISOString() : null,
+      soldAt:
+        tsIso !== null && !Number.isNaN(Date.parse(tsIso)) ? new Date(tsIso).toISOString() : null,
       source: 'site:home-activities:flight',
     })
   }
@@ -135,7 +140,10 @@ export function parsePackDetailResponse(rawText: string): { pack: NewPack; pulls
   return { pack, pulls }
 }
 
-export function parseMarketplaceResponse(rawText: string): { listings: NewListing[]; total: number } {
+export function parseMarketplaceResponse(rawText: string): {
+  listings: NewListing[]
+  total: number
+} {
   const parsed = MarketplaceResponseSchema.parse(JSON.parse(rawText))
   return { listings: parsed.collection.map(normalizeListing), total: parsed.pagination.total }
 }

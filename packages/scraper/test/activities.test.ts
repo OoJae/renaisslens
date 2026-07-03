@@ -62,10 +62,7 @@ describe('ActivitiesSchema + normalizeActivities (golden, from live snapshot)', 
   })
 
   it('skips non-SELL actions without failing', () => {
-    const withMint = [
-      ...REAL_ACTIVITIES,
-      { ...REAL_ACTIVITIES[0], id: '0xmint-1', action: 'MINT' },
-    ]
+    const withMint = [...REAL_ACTIVITIES, { ...REAL_ACTIVITIES[0], id: '0xmint-1', action: 'MINT' }]
     const sales = normalizeActivities(ActivitiesSchema.parse(withMint))
     expect(sales).toHaveLength(2)
   })
@@ -78,7 +75,10 @@ describe('ActivitiesSchema + normalizeActivities (golden, from live snapshot)', 
 
 describe('gradeFromTitle', () => {
   it('extracts grader + grade from title prefixes', () => {
-    expect(gradeFromTitle('PSA 10 Gem Mint 2021 Pokemon …')).toEqual({ company: 'PSA', grade: '10' })
+    expect(gradeFromTitle('PSA 10 Gem Mint 2021 Pokemon …')).toEqual({
+      company: 'PSA',
+      grade: '10',
+    })
     expect(gradeFromTitle('BGS 9.5 Gem Mint Luffy OP-01')).toEqual({ company: 'BGS', grade: '9.5' })
     expect(gradeFromTitle('CGC 8 Charizard')).toEqual({ company: 'CGC', grade: '8' })
     expect(gradeFromTitle('Sealed Booster Box')).toEqual({ company: null, grade: null })

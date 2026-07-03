@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  FlightParseError,
   extractActivities,
   extractJsonByMarker,
+  FlightParseError,
   joinFlightChunks,
 } from '../src/site/flight'
 

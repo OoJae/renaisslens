@@ -69,7 +69,9 @@ export const MarketplaceItemSchema = z
     askPriceInUSDT: z.union([weiString, NO_ASK]),
     askExpiresAt: z.string().nullish(),
     fmvPriceInUSD: z.union([centsString, NO_FMV]),
-    attributes: z.array(z.object({ trait: z.string(), value: z.unknown() }).passthrough()).nullish(),
+    attributes: z
+      .array(z.object({ trait: z.string(), value: z.unknown() }).passthrough())
+      .nullish(),
     vaultLocation: z.string().nullish(),
     gradingCompany: z.string().nullish(),
     grade: z.union([z.string(), z.number()]).nullish(),
@@ -112,7 +114,10 @@ export const ActivitySchema = z
     timestamp: flightDate.nullish(),
     createdAt: flightDate.nullish(),
     priceChangePercentage: z.number().nullish(),
-    collectible: z.object({ name: z.string().min(1) }).passthrough().nullish(),
+    collectible: z
+      .object({ name: z.string().min(1) })
+      .passthrough()
+      .nullish(),
   })
   .passthrough()
 export const ActivitiesSchema = z.array(ActivitySchema)

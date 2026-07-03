@@ -10,5 +10,7 @@ for (const suffix of ['', '-journal', '-wal', '-shm']) {
 }
 const db = openDb(dbPath)
 runMigrations(db)
-console.log(`reset: fresh db at ${dbPath} (user_version=${db.pragma('user_version', { simple: true })})`)
+console.log(
+  `reset: fresh db at ${dbPath} (user_version=${db.pragma('user_version', { simple: true })})`,
+)
 db.close()

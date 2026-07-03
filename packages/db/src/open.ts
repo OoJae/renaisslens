@@ -1,5 +1,5 @@
-import SqliteDatabase from 'better-sqlite3'
 import type { Database } from 'better-sqlite3'
+import SqliteDatabase from 'better-sqlite3'
 import { defaultDbPath, ensureDirFor } from './paths'
 
 export function openDb(path?: string, opts: { readonly?: boolean } = {}): Database {

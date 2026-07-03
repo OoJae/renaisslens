@@ -61,7 +61,10 @@ export async function scrapeActivitiesDom(): Promise<DomScrapeResult> {
       if (host !== siteHost && !host.endsWith('.vercel-storage.com')) return route.abort()
       return route.continue()
     })
-    await page.goto(CONFIG.siteBaseUrl, { waitUntil: 'domcontentloaded', timeout: CONFIG.pageTimeoutMs })
+    await page.goto(CONFIG.siteBaseUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: CONFIG.pageTimeoutMs,
+    })
     await page.getByText(SELECTORS.headingText).first().waitFor({ timeout: CONFIG.pageTimeoutMs })
 
     const rows = await page.evaluate(

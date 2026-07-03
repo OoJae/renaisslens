@@ -9,7 +9,10 @@
  */
 
 export class FlightParseError extends Error {
-  constructor(message: string, readonly contextExcerpt?: string) {
+  constructor(
+    message: string,
+    readonly contextExcerpt?: string,
+  ) {
     super(`FlightParseError: ${message}`)
     this.name = 'FlightParseError'
   }
@@ -56,7 +59,10 @@ export function extractJsonByMarker(flightText: string, markers: string[]): unkn
     }
   }
   const excerpt = flightText.slice(0, 400)
-  throw new FlightParseError(`no marker matched (${markers.map((m) => JSON.stringify(m)).join(', ')})`, excerpt)
+  throw new FlightParseError(
+    `no marker matched (${markers.map((m) => JSON.stringify(m)).join(', ')})`,
+    excerpt,
+  )
 }
 
 function findValueStart(text: string, from: number): number {
@@ -78,7 +84,8 @@ function scanBalanced(text: string, start: number): string | null {
   for (let i = start; i < text.length; i++) {
     const ch = text[i]
     if (inString) {
-      if (ch === '\\') i++ // skip escaped char
+      if (ch === '\\')
+        i++ // skip escaped char
       else if (ch === '"') inString = false
       continue
     }
