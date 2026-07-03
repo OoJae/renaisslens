@@ -1,4 +1,11 @@
-import { type Database, countRows, getDataMode, getFreshness, getMeta, openDb } from '@renaisslens/db'
+import {
+  countRows,
+  type Database,
+  getDataMode,
+  getFreshness,
+  getMeta,
+  openDb,
+} from '@renaisslens/db'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -17,6 +24,7 @@ export function GET() {
         listings: countRows(db, 'listings'),
         sales: countRows(db, 'sales'),
         snapshots: countRows(db, 'snapshots'),
+        evRuns: countRows(db, 'ev_runs'),
       },
       freshness: getFreshness(db),
     }
