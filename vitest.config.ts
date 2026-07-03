@@ -10,6 +10,13 @@ export default defineConfig({
           include: ['packages/*/test/**/*.test.ts', 'packages/*/src/**/*.test.ts'],
         },
       },
+      {
+        test: {
+          name: 'web',
+          environment: 'node',
+          include: ['apps/web/src/**/*.test.ts'],
+        },
+      },
     ],
   },
 })
