@@ -1,0 +1,40 @@
+{
+  "updatedAt": "2026-07-03T10:59:01.281Z",
+  "sources": {
+    "api-packs": {
+      "latest": "sources/api-packs/2026-07-03T10-57-37-367Z",
+      "fetchedAt": "2026-07-03T10:57:37.367Z",
+      "status": "ok"
+    },
+    "api-pack-detail:world-cup-pack": {
+      "latest": "sources/api-pack-detail__world-cup-pack/2026-07-03T10-57-38-730Z",
+      "fetchedAt": "2026-07-03T10:57:38.730Z",
+      "status": "ok"
+    },
+    "api-pack-detail:eden-pack": {
+      "latest": "sources/api-pack-detail__eden-pack/2026-07-03T10-57-40-725Z",
+      "fetchedAt": "2026-07-03T10:57:40.725Z",
+      "status": "ok"
+    },
+    "api-pack-detail:omega": {
+      "latest": "sources/api-pack-detail__omega/2026-07-03T10-57-42-728Z",
+      "fetchedAt": "2026-07-03T10:57:42.728Z",
+      "status": "ok"
+    },
+    "api-pack-detail:renacrypt-pack": {
+      "latest": "sources/api-pack-detail__renacrypt-pack/2026-07-03T10-57-44-737Z",
+      "fetchedAt": "2026-07-03T10:57:44.737Z",
+      "status": "ok"
+    },
+    "api-marketplace": {
+      "latest": "sources/api-marketplace/2026-07-03T10-57-50-746Z",
+      "fetchedAt": "2026-07-03T10:57:50.746Z",
+      "status": "ok"
+    },
+    "site-home-activities": {
+      "latest": "sources/site-home-activities/2026-07-03T10-57-54-855Z",
+      "fetchedAt": "2026-07-03T10:57:54.855Z",
+      "status": "ok"
+    }
+  }
+}

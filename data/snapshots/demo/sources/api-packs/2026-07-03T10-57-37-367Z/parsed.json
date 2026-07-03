@@ -1,0 +1,46 @@
+[
+  {
+    "slug": "world-cup-pack",
+    "name": "World Cup Pack",
+    "packType": "limited",
+    "stage": "soldout-or-restocking",
+    "description": "Pokémon Trainers, take the pitch.\n\nIntroducing the World Cup Pack – a special themed release inspired by football energy, stadium moments, and the crossover charm that makes collectibles feel unforgettable.\n\nEach pack is sealed with blockchain-level fairness.\nEvery card inside is encrypted, its authenticity anchored by Merkle proofs and zero-knowledge validation – ensuring that what you draw is truly random, transparent, and verifiable on-chain.\n\nA themed limited release.\n1,000 real graded cards, fairly encrypted.\nVault-secured custody.\nLive, verifiable, on-chain.\n\nKick off the moment.\nReveal the card.",
+    "author": "Renaiss",
+    "priceCents": 10000,
+    "expectedValueCents": 10463,
+    "featuredCardFmvCents": 380000
+  },
+  {
+    "slug": "eden-pack",
+    "name": "Eden Pack",
+    "packType": "perpetual",
+    "stage": "active",
+    "description": "Collectors, enter Eden.\n\nIntroducing the Eden Pack – a new Infinite Gacha release inspired by rare treasures, legendary pulls, and the thrill of finding paradise at sea.\n\nEach draw is sealed with blockchain-level fairness.\nEvery card inside is encrypted, its authenticity anchored by Merkle proofs and zero-knowledge validation – ensuring that what you draw is truly random, transparent, and verifiable on-chain.\n\nAn Infinite Gacha release.\nWith BGS Black Label 10 cards entering the pool.\nVault-secured custody.\nLive, verifiable, on-chain.\n\nEnter Eden.\nReveal the treasure.",
+    "author": "Renaiss x Logoman",
+    "priceCents": 15000,
+    "expectedValueCents": 15500,
+    "featuredCardFmvCents": 443400
+  },
+  {
+    "slug": "omega",
+    "name": "OMEGA",
+    "packType": "perpetual",
+    "stage": "active",
+    "description": "Pokémon Trainers, welcome to the infinite era.\nThis is Renaiss’ perpetual gacha - an always-on card machine with a continuously refreshed pool.\nEach pack is sealed with blockchain-level fairness.\nEvery card inside is encrypted, its authenticity anchored by Merkle proofs and zero-knowledge validation - ensuring that what you draw is truly random, transparent, and verifiable on-chain.\nCards flow in and out dynamically under an infinite supply model, with pricing and expected value aligned to real market conditions.\nReal graded cards.\nLive, verifiable, on-chain.",
+    "author": "Renaiss",
+    "priceCents": 4800,
+    "expectedValueCents": 5184,
+    "featuredCardFmvCents": 153200
+  },
+  {
+    "slug": "renacrypt-pack",
+    "name": "RenaCrypt Pack",
+    "packType": "perpetual",
+    "stage": "active",
+    "description": "Collectors, welcome to Renacrypt.\n\nIntroducing the Renacrypt Pack — an always-on collaborative card engine by Renaiss × Collector Crypt.\n\nThis is not a limited drop.\nThis is a perpetual system.\n\nAn infinite card machine powered by a continuously refreshed vault-backed pool — where real graded collectibles circulate dynamically in and out under live market alignment.\nEach pack is sealed with blockchain-level fairness.\n\nEvery card is encrypted, with its provenance anchored by Merkle proofs and zero-knowledge validation — ensuring that every pull is provably random, fully transparent, and verifiable on-chain.\n\nNo artificial scarcity.\nNo hidden mechanics.\n\nSupply flows.\nMarket aligns.\nFairness remains absolute.\n\nReal graded cards.\nVault-secured custody.\nLive, verifiable, on-chain.\n\nRenacrypt is where the machine never sleeps.\n\nPull anytime.",
+    "author": "Renaiss x CC",
+    "priceCents": 8800,
+    "expectedValueCents": 9500,
+    "featuredCardFmvCents": 241500
+  }
+]

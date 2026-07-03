@@ -1,0 +1,13 @@
+{
+  "source": "api-packs",
+  "cycleId": "2026-07-03T10:57:36.569Z",
+  "url": "https://api.renaiss.xyz/v0/packs",
+  "fetchedAt": "2026-07-03T10:57:37.367Z",
+  "httpStatus": 200,
+  "contentSha256": "e532fa35b51ba890b6427024f5830fe401652d39252380a83c0547a4bceffed8",
+  "status": "ok",
+  "error": null,
+  "files": [
+    "raw.json"
+  ]
+}

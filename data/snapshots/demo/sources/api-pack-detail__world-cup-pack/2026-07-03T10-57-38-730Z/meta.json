@@ -1,0 +1,13 @@
+{
+  "source": "api-pack-detail:world-cup-pack",
+  "cycleId": "2026-07-03T10:57:36.569Z",
+  "url": "https://api.renaiss.xyz/v0/packs/world-cup-pack",
+  "fetchedAt": "2026-07-03T10:57:38.730Z",
+  "httpStatus": 200,
+  "contentSha256": "96237f8380a8a6afedf1b93bb5588074eacd54eefac6ab2c9e0554f2a22733af",
+  "status": "ok",
+  "error": null,
+  "files": [
+    "raw.json"
+  ]
+}

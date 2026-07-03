@@ -1,0 +1,225 @@
+{
+  "pack": {
+    "slug": "renacrypt-pack",
+    "name": "RenaCrypt Pack",
+    "packType": "perpetual",
+    "stage": "active",
+    "description": "Collectors, welcome to Renacrypt.\n\nIntroducing the Renacrypt Pack — an always-on collaborative card engine by Renaiss × Collector Crypt.\n\nThis is not a limited drop.\nThis is a perpetual system.\n\nAn infinite card machine powered by a continuously refreshed vault-backed pool — where real graded collectibles circulate dynamically in and out under live market alignment.\nEach pack is sealed with blockchain-level fairness.\n\nEvery card is encrypted, with its provenance anchored by Merkle proofs and zero-knowledge validation — ensuring that every pull is provably random, fully transparent, and verifiable on-chain.\n\nNo artificial scarcity.\nNo hidden mechanics.\n\nSupply flows.\nMarket aligns.\nFairness remains absolute.\n\nReal graded cards.\nVault-secured custody.\nLive, verifiable, on-chain.\n\nRenacrypt is where the machine never sleeps.\n\nPull anytime.",
+    "author": "Renaiss x CC",
+    "priceCents": 8800,
+    "expectedValueCents": 9500,
+    "featuredCardFmvCents": 241500
+  },
+  "pulls": [
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "6006309176296699580010193926682394172105782958201581334944786709804804863942",
+      "tier": "common",
+      "fmvCents": 8505,
+      "pulledAt": 1783075617
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "61102426267037382222179456660575240784197734345038407935343107213621436863319",
+      "tier": "common",
+      "fmvCents": 7668,
+      "pulledAt": 1783075462
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "32380712331456669693731636348713172494524870208519418747737495429601083485732",
+      "tier": "common",
+      "fmvCents": 5405,
+      "pulledAt": 1783075328
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "1647492269535206956807319871385159698564107439424559284305809589363141092415",
+      "tier": "common",
+      "fmvCents": 5750,
+      "pulledAt": 1783075242
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "91509781312420492162710696290750162280918883376476952621867198866795740640474",
+      "tier": "uncommon",
+      "fmvCents": 12180,
+      "pulledAt": 1783074973
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "114504226533566347962040601472052041099699509484773743667253804475702982564617",
+      "tier": "common",
+      "fmvCents": 7980,
+      "pulledAt": 1783074942
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "100000795755207871678506413242375629730592905602740764550827817945717630825918",
+      "tier": "uncommon",
+      "fmvCents": 9555,
+      "pulledAt": 1783074910
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "53786670973745104584953025948318046374856427066676563965229768261523911329288",
+      "tier": "rare",
+      "fmvCents": 19635,
+      "pulledAt": 1783074773
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "19003861246180343748401778048767331363315242825865335394630648293499403637555",
+      "tier": "common",
+      "fmvCents": 6440,
+      "pulledAt": 1783074729
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "1325443292589379229719825971745166191786672227001700854970100497600278651319",
+      "tier": "uncommon",
+      "fmvCents": 9200,
+      "pulledAt": 1783074686
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "13677752727498376343261243865541643753998865032433138070065423848304621867925",
+      "tier": "uncommon",
+      "fmvCents": 9450,
+      "pulledAt": 1783073603
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "89361814203606479106574215047803221035856854208224886303819564229927722137237",
+      "tier": "common",
+      "fmvCents": 5750,
+      "pulledAt": 1783073435
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "102733435760356529895268352745266405165897672144170272203780556021976503746291",
+      "tier": "common",
+      "fmvCents": 8625,
+      "pulledAt": 1783073385
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "24212055278874081510716102445718407572939603148488880154217225184163621531638",
+      "tier": "uncommon",
+      "fmvCents": 11130,
+      "pulledAt": 1783073347
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "45198512718310185439253860083262124195173793011179626086649998329346059351495",
+      "tier": "common",
+      "fmvCents": 5750,
+      "pulledAt": 1783072852
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "68248302904215263294307082970167170525797184898324861806371130441980767766264",
+      "tier": "common",
+      "fmvCents": 5635,
+      "pulledAt": 1783072852
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "91470486101611706723193076219145820673702854955996637581222892540224485507441",
+      "tier": "common",
+      "fmvCents": 8050,
+      "pulledAt": 1783072852
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "29448734880380931140330200676686818303090131401615723421673051530691972453250",
+      "tier": "common",
+      "fmvCents": 5750,
+      "pulledAt": 1783072852
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "112807491457955573614502254357802274459234383858206765331260979754752232693935",
+      "tier": "common",
+      "fmvCents": 6900,
+      "pulledAt": 1783072852
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "67936059610217859023663376939174658051880389643401253976890462289342854188605",
+      "tier": "common",
+      "fmvCents": 7800,
+      "pulledAt": 1783072723
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "3114307385314041113956755931134259295501283396799636513048146716898378234674",
+      "tier": "common",
+      "fmvCents": 5775,
+      "pulledAt": 1783072676
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "102743842104294957425470387974419846526648714277055460550131586314224260917649",
+      "tier": "common",
+      "fmvCents": 7560,
+      "pulledAt": 1783072452
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "42820735170408937648817545157273281464109522038835210064983774301145071119049",
+      "tier": "uncommon",
+      "fmvCents": 11500,
+      "pulledAt": 1783072412
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "81871168529076362365846608733628258388559718457730078116149866961412840817414",
+      "tier": "uncommon",
+      "fmvCents": 10350,
+      "pulledAt": 1783072370
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "25821859245347568841229132042568168710809968463556098965573818597425098234782",
+      "tier": "common",
+      "fmvCents": 8280,
+      "pulledAt": 1783072337
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "23495673508059157039448258871513787477453351684331560952625741299704623625265",
+      "tier": "common",
+      "fmvCents": 5250,
+      "pulledAt": 1783072308
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "89348875335166586056679673656946706417108714708335174047820380348359190683962",
+      "tier": "uncommon",
+      "fmvCents": 12810,
+      "pulledAt": 1783072274
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "19354268483487263238143673124575454860139646510060459507318970803297741013326",
+      "tier": "common",
+      "fmvCents": 7475,
+      "pulledAt": 1783072246
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "18494285562524997080624650226239369203800071338405949451097393041945684438897",
+      "tier": "common",
+      "fmvCents": 8855,
+      "pulledAt": 1783072190
+    },
+    {
+      "packSlug": "renacrypt-pack",
+      "collectibleTokenId": "112382545732341969879660726269462723997183357482978928983450241329256251065867",
+      "tier": "uncommon",
+      "fmvCents": 10350,
+      "pulledAt": 1783072153
+    }
+  ]
+}

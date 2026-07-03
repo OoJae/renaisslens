@@ -1,0 +1,14 @@
+{
+  "source": "site-home-activities",
+  "cycleId": "2026-07-03T10:57:36.569Z",
+  "url": "https://www.renaiss.xyz",
+  "fetchedAt": "2026-07-03T10:57:54.855Z",
+  "httpStatus": 200,
+  "contentSha256": "61d6f7c7e63738c95f969a876b093a4a939786a38bac9ac00b96eeaf2aced287",
+  "status": "ok",
+  "error": null,
+  "files": [
+    "raw.html.gz"
+  ],
+  "extraction": "flight"
+}

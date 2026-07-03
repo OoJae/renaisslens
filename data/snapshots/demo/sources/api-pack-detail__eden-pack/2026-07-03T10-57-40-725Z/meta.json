@@ -1,0 +1,13 @@
+{
+  "source": "api-pack-detail:eden-pack",
+  "cycleId": "2026-07-03T10:57:36.569Z",
+  "url": "https://api.renaiss.xyz/v0/packs/eden-pack",
+  "fetchedAt": "2026-07-03T10:57:40.725Z",
+  "httpStatus": 200,
+  "contentSha256": "a3db06dd788d9bfd7311e0a9230270c8a4672ab89e21ad565fcb96f3d4bb95ad",
+  "status": "ok",
+  "error": null,
+  "files": [
+    "raw.json"
+  ]
+}
