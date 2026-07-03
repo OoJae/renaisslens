@@ -1,7 +1,16 @@
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import type { Database, NewListing, NewPack, NewPull, NewSale } from '@renaisslens/db'
-import { getMeta, insertSnapshot, openDb, recordSourceAttempt, runMigrations, setMeta } from '@renaisslens/db'
+import {
+  countRows,
+  getMeta,
+  insertSnapshot,
+  openDb,
+  recordSourceAttempt,
+  runMigrations,
+  setMeta,
+} from '@renaisslens/db'
+import { runEv } from '../ev'
 import { loadListings, loadPacks, loadPulls, loadSales } from '../load'
 import {
   parseActivitiesHtml,
@@ -41,18 +50,24 @@ export function runMock(opts: { db?: Database } = {}): MockReport {
   const manifest = readManifest('demo')
 
   if (getMeta(db, 'data_mode') === 'live') {
-    if (opts.db === undefined) db.close()
-    return {
-      cycleId: 'mock:skipped',
-      mode: 'mock',
-      sources: [
-        {
-          source: '(all)',
-          status: 'ok',
-          detail: 'skipped — DB holds live data; run `pnpm db:reset` to replay the demo set',
-        },
-      ],
+    const sources: MockReport['sources'] = [
+      {
+        source: '(all)',
+        status: 'ok',
+        detail: 'skipped — DB holds live data; run `pnpm db:reset` to replay the demo set',
+      },
+    ]
+    // backfill only: an interrupted earlier run may have ingested live data
+    // without ever computing EV — never append duplicate runs on every boot
+    if (countRows(db, 'ev_runs') === 0) {
+      try {
+        sources.push(...runEv({ db }).sources)
+      } catch (err) {
+        sources.push({ source: 'ev-engine', status: 'failed', detail: evError(err) })
+      }
     }
+    if (opts.db === undefined) db.close()
+    return { cycleId: 'mock:skipped', mode: 'mock', sources }
   }
 
   // replay in capture order, not alphabetical — keeps first_seen/last_seen
@@ -84,9 +99,15 @@ export function runMock(opts: { db?: Database } = {}): MockReport {
       // failed to parse
       let parsed: ParsedDemo
       if (source === 'api-packs') {
-        parsed = { kind: 'packs', packs: parsePacksResponse(snap.readRaw('raw.json').toString('utf8')) }
+        parsed = {
+          kind: 'packs',
+          packs: parsePacksResponse(snap.readRaw('raw.json').toString('utf8')),
+        }
       } else if (source.startsWith('api-pack-detail:')) {
-        parsed = { kind: 'pack-detail', ...parsePackDetailResponse(snap.readRaw('raw.json').toString('utf8')) }
+        parsed = {
+          kind: 'pack-detail',
+          ...parsePackDetailResponse(snap.readRaw('raw.json').toString('utf8')),
+        }
       } else if (source === 'api-marketplace') {
         const listings: NewListing[] = []
         for (const file of meta.files.filter((f) => f.startsWith('page-'))) {
@@ -153,6 +174,17 @@ export function runMock(opts: { db?: Database } = {}): MockReport {
 
   setMeta(db, 'data_mode', 'mock')
   if (manifest.updatedAt) setMeta(db, 'demo_captured_at', manifest.updatedAt)
+  // replayed data → compute EV so `pnpm dev` always boots with ranges on screen
+  if (reports.some((r) => r.status === 'ok')) {
+    try {
+      reports.push(...runEv({ db }).sources)
+    } catch (err) {
+      reports.push({ source: 'ev-engine', status: 'failed', detail: evError(err) })
+    }
+  }
   if (opts.db === undefined) db.close()
   return { cycleId: `mock:${manifest.updatedAt}`, mode: 'mock', sources: reports }
 }
+
+const evError = (err: unknown): string =>
+  String(err instanceof Error ? err.message : err).slice(0, 300)

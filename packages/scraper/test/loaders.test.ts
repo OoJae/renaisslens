@@ -7,7 +7,7 @@ import {
   recentSales,
   runMigrations,
 } from '@renaisslens/db'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { loadListings, loadPacks, loadPulls, loadSales } from '../src/load'
 
 const NOW = '2026-07-03T12:00:00.000Z'
@@ -61,17 +61,36 @@ describe('loadPulls', () => {
   it('dedupes across overlapping polls and measures overlap', () => {
     const { db, snapshotId } = freshDb()
     loadPacks(db, [OMEGA], snapshotId, NOW)
+    const repeatPull = {
+      packSlug: 'omega',
+      collectibleTokenId: '111',
+      tier: 'C',
+      fmvCents: 4900,
+      pulledAt: 1_783_073_208,
+    }
     const poll1 = [
-      { packSlug: 'omega', collectibleTokenId: '111', tier: 'C', fmvCents: 4900, pulledAt: 1_783_073_208 },
-      { packSlug: 'omega', collectibleTokenId: '222', tier: 'S', fmvCents: 63510, pulledAt: 1_783_070_346 },
+      repeatPull,
+      {
+        packSlug: 'omega',
+        collectibleTokenId: '222',
+        tier: 'S',
+        fmvCents: 63510,
+        pulledAt: 1_783_070_346,
+      },
     ]
     let stats = loadPulls(db, poll1, snapshotId, NOW)
     expect(stats).toMatchObject({ returned: 2, inserted: 2, windowLikelyOverflowed: true })
 
     // second poll overlaps one row, adds one new
     const poll2 = [
-      poll1[0]!,
-      { packSlug: 'omega', collectibleTokenId: '333', tier: 'B', fmvCents: 6100, pulledAt: 1_783_075_000 },
+      repeatPull,
+      {
+        packSlug: 'omega',
+        collectibleTokenId: '333',
+        tier: 'B',
+        fmvCents: 6100,
+        pulledAt: 1_783_075_000,
+      },
     ]
     stats = loadPulls(db, poll2, snapshotId, LATER)
     expect(stats).toMatchObject({ returned: 2, inserted: 1, windowLikelyOverflowed: false })
@@ -82,7 +101,13 @@ describe('loadPulls', () => {
   it('same token re-pulled after buyback/restock is a NEW row (pulled_at in key)', () => {
     const { db, snapshotId } = freshDb()
     loadPacks(db, [OMEGA], snapshotId, NOW)
-    const first = { packSlug: 'omega', collectibleTokenId: '999', tier: 'A', fmvCents: 10100, pulledAt: 1_783_000_000 }
+    const first = {
+      packSlug: 'omega',
+      collectibleTokenId: '999',
+      tier: 'A',
+      fmvCents: 10100,
+      pulledAt: 1_783_000_000,
+    }
     loadPulls(db, [first], snapshotId, NOW)
     const rePull = { ...first, pulledAt: 1_783_099_999 }
     const stats = loadPulls(db, [rePull], snapshotId, LATER)

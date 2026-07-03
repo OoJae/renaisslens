@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { CONFIG } from './config'
 import { printReport, runCycle } from './cycle'
+import { runEv } from './ev'
 import { runMock } from './snapshots/mockLoader'
 import { pruneLive } from './snapshots/store'
 
@@ -9,7 +10,10 @@ const program = new Command('renaisslens-scraper')
 program
   .command('run')
   .description('one full polite ingestion cycle (live network)')
-  .option('--source <source>', 'run a single source group: api-packs | api-pack-details | api-marketplace | site-home-activities')
+  .option(
+    '--source <source>',
+    'run a single source group: api-packs | api-pack-details | api-marketplace | site-home-activities',
+  )
   .action(async (opts: { source?: string }) => {
     try {
       const report = await runCycle({ only: opts.source })
@@ -25,6 +29,22 @@ program
   .description('load committed demo snapshots — zero network')
   .action(() => {
     const report = runMock()
+    process.exitCode = printReport(report)
+  })
+
+program
+  .command('ev')
+  .description('compute EV ranges for all packs × scenarios from current DB state — zero network')
+  .option('--pack <slug>', 'compute a single pack')
+  .option('--iterations <n>', 'Monte Carlo iterations per scenario', '100000')
+  .action((opts: { pack?: string; iterations: string }) => {
+    const iterations = Number.parseInt(opts.iterations, 10)
+    if (!Number.isInteger(iterations) || iterations < 1) {
+      console.error(`--iterations must be a positive integer, got "${opts.iterations}"`)
+      process.exitCode = 1
+      return
+    }
+    const report = runEv({ pack: opts.pack, iterations })
     process.exitCode = printReport(report)
   })
 

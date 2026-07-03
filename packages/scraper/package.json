@@ -10,12 +10,14 @@
     "scrape": "tsx src/cli.ts run",
     "scrape:mock": "tsx src/cli.ts mock",
     "scrape:watch": "tsx src/cli.ts watch",
+    "ev": "tsx src/cli.ts ev",
     "prune": "tsx src/cli.ts prune",
     "codegen": "openapi-typescript https://api.renaiss.xyz/openapi.json -o src/api/types.gen.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@renaisslens/db": "workspace:*",
+    "@renaisslens/ev-engine": "workspace:*",
     "commander": "^12.1.0",
     "playwright": "1.60.0",
     "zod": "^3.24.0"

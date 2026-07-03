@@ -10,6 +10,7 @@ import {
 import { ZodError } from 'zod'
 import { getHomepage, getMarketplacePage, getPackDetail, getPacks } from './api/client'
 import { CONFIG } from './config'
+import { runEv } from './ev'
 import { loadListings, loadPacks, loadPulls, loadSales } from './load'
 import { MoneyParseError } from './parsers/money'
 import {
@@ -19,7 +20,6 @@ import {
   parsePackDetailResponse,
   parsePacksResponse,
 } from './parsers/normalize'
-import { CollectorError } from './politeClient'
 import { scrapeActivitiesDom } from './site/activitiesDom'
 import { FlightParseError } from './site/flight'
 import { writeSnapshot } from './snapshots/store'
@@ -127,8 +127,13 @@ export const SOURCE_GROUPS = [
 ] as const
 
 export async function runCycle(opts: { only?: string; db?: Database } = {}): Promise<CycleReport> {
-  if (opts.only !== undefined && !SOURCE_GROUPS.includes(opts.only as (typeof SOURCE_GROUPS)[number])) {
-    throw new Error(`unknown --source "${opts.only}" — expected one of: ${SOURCE_GROUPS.join(', ')}`)
+  if (
+    opts.only !== undefined &&
+    !SOURCE_GROUPS.includes(opts.only as (typeof SOURCE_GROUPS)[number])
+  ) {
+    throw new Error(
+      `unknown --source "${opts.only}" — expected one of: ${SOURCE_GROUPS.join(', ')}`,
+    )
   }
   const db = opts.db ?? openDb()
   runMigrations(db)
@@ -176,7 +181,12 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
         reports.push({ source, status: 'quarantined', detail: shortError(err) })
       }
     } catch (err) {
-      recordSourceAttempt(db, source, { status: 'failed', error: shortError(err) }, new Date().toISOString())
+      recordSourceAttempt(
+        db,
+        source,
+        { status: 'failed', error: shortError(err) },
+        new Date().toISOString(),
+      )
       reports.push({ source, status: 'failed', detail: shortError(err) })
     }
   }
@@ -224,7 +234,12 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
           reports.push({ source, status: 'quarantined', detail: shortError(err) })
         }
       } catch (err) {
-        recordSourceAttempt(db, source, { status: 'failed', error: shortError(err) }, new Date().toISOString())
+        recordSourceAttempt(
+          db,
+          source,
+          { status: 'failed', error: shortError(err) },
+          new Date().toISOString(),
+        )
         reports.push({ source, status: 'failed', detail: shortError(err) })
       }
     }
@@ -241,7 +256,10 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
       const allListings = []
       let total = 0
       for (let i = 0; i < CONFIG.marketplacePages; i++) {
-        const res = await getMarketplacePage(i * CONFIG.marketplacePageSize, CONFIG.marketplacePageSize)
+        const res = await getMarketplacePage(
+          i * CONFIG.marketplacePageSize,
+          CONFIG.marketplacePageSize,
+        )
         pages.push({ name: `page-${i}.json`, body: res.rawText })
         const { listings, total: t } = parseMarketplaceResponse(res.rawText) // throws → quarantine below
         allListings.push(...listings)
@@ -278,7 +296,12 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
         reports.push({ source, status: 'quarantined', detail: shortError(err) })
       } else {
         // network error or infra failure (disk, SQLITE_BUSY) — not a data-shape problem
-        recordSourceAttempt(db, source, { status: 'failed', error: shortError(err) }, new Date().toISOString())
+        recordSourceAttempt(
+          db,
+          source,
+          { status: 'failed', error: shortError(err) },
+          new Date().toISOString(),
+        )
         reports.push({ source, status: 'failed', detail: shortError(err) })
       }
     }
@@ -342,17 +365,44 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
             detail: `${stats.inserted}/${stats.returned} sales new (DOM fallback — lower confidence)`,
           })
         } catch (domErr) {
-          reports.push({ source, status: 'quarantined', detail: `dom fallback also failed: ${shortError(domErr)}` })
+          reports.push({
+            source,
+            status: 'quarantined',
+            detail: `dom fallback also failed: ${shortError(domErr)}`,
+          })
         }
       }
     } catch (err) {
-      recordSourceAttempt(db, source, { status: 'failed', error: shortError(err) }, new Date().toISOString())
+      recordSourceAttempt(
+        db,
+        source,
+        { status: 'failed', error: shortError(err) },
+        new Date().toISOString(),
+      )
       reports.push({ source, status: 'failed', detail: shortError(err) })
     }
   }
 
   // only claim live mode when at least one source actually ingested live data
-  if (reports.some((r) => r.status === 'ok')) setMeta(db, 'data_mode', 'live')
+  if (reports.some((r) => r.status === 'ok')) {
+    setMeta(db, 'data_mode', 'live')
+    // Recompute EV only when a source that changes EV inputs (packs or pulls)
+    // succeeded — a marketplace- or activities-only sweep (watch mode runs each
+    // source on its own cadence) leaves the model unchanged, so recomputing
+    // would only append identical history rows and burn cycles.
+    const evInputsChanged = reports.some(
+      (r) =>
+        r.status === 'ok' && (r.source === 'api-packs' || r.source.startsWith('api-pack-detail:')),
+    )
+    if (evInputsChanged) {
+      // fresh EV inputs → recompute ranges. An EV failure must never fail ingestion.
+      try {
+        reports.push(...runEv({ db }).sources)
+      } catch (err) {
+        reports.push({ source: 'ev-engine', status: 'failed', detail: shortError(err) })
+      }
+    }
+  }
   const finishedAt = new Date().toISOString()
   if (opts.db === undefined) db.close()
   return { cycleId, mode: 'live', startedAt, finishedAt, sources: reports }
