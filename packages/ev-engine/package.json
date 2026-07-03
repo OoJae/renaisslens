@@ -1,0 +1,16 @@
+{
+  "name": "@renaisslens/ev-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "fast-check": "^3.23.0"
+  }
+}

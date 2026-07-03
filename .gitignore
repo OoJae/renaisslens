@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# env — .env.example is the only env file that ships
+.env
+.env.*
+!.env.example
+
+# sqlite runtime state (data/snapshots/demo/ IS committed)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# live snapshots are runtime state; the curated demo set is committed
+data/snapshots/live/
+
+# playwright artifacts
+test-results/
+playwright-report/
+.playwright/
+
+# misc
+.DS_Store
+*.log
+coverage/
+*.tsbuildinfo
