@@ -25,9 +25,20 @@ No env vars needed — the dashboard boots offline from committed sample snapsho
 | `pnpm lint` / `pnpm typecheck` | Biome + `tsc --noEmit` |
 | `pnpm db:migrate` / `pnpm db:reset` | Apply migrations / wipe + rebuild from demo snapshots |
 
+## AI explainer (optional)
+
+Every pack page has an "explain it like a collector" button powered by the Claude API. It is
+strictly optional: without an `ANTHROPIC_API_KEY` in the environment the button doesn't render
+and `POST /api/explain` returns a friendly 503 — the keyless demo is unaffected. The model only
+receives the numbers already shown on the page (never a single-point EV), must label
+assumptions, refuses buy/sell advice, and its output always ends with a not-financial-advice
+caveat that the server enforces. Default model `claude-opus-4-8` (override with
+`RENAISSLENS_EXPLAINER_MODEL`); a rough cost is $0.03–$0.10 per uncached click — repeat clicks
+are served from an in-memory cache until the next EV run changes the data.
+
 ## Screenshots
 
-_(coming with Milestone 4 — dashboard polish)_
+_(coming with the final polish milestone)_
 
 ## Demo video
 
