@@ -9,6 +9,7 @@ import {
   listPacks,
   openDb,
 } from '@renaisslens/db'
+import Link from 'next/link'
 import { PackCard } from '@/components/pack-card'
 import { packEv } from '@/lib/verdict-ui'
 
@@ -105,9 +106,12 @@ export default function Home() {
         <p className="mt-4 text-xs text-zinc-500">
           †Our independent estimate: a seeded Monte Carlo range across pool-assumption scenarios
           (neutral scenario shown{computedLabel}); the verdict only reads +/−EV when skeptical
-          scenarios agree. See the methodology in METHODOLOGY.md. *Renaiss&apos;s own published
-          figure, not our estimate — shown for contrast, never used in our model. Source:
-          api.renaiss.xyz/v0/packs.
+          scenarios agree. See the{' '}
+          <Link href="/methodology" className="underline hover:text-zinc-300">
+            methodology
+          </Link>
+          . *Renaiss&apos;s own published figure, not our estimate — shown for contrast, never used
+          in our model. Source: api.renaiss.xyz/v0/packs.
         </p>
       </section>
 

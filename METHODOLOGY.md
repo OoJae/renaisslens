@@ -1,6 +1,6 @@
 # Methodology
 
-_This document is the single source of truth for how RenaissLens collects data, what it assumes, and what it cannot know. It is linked from the dashboard; an in-app Methodology page mirroring it ships in a later milestone._
+_This document is the single source of truth for how RenaissLens collects data, what it assumes, and what it cannot know. It is mirrored in the app at `/methodology`._
 
 ## Data sources & collection
 
@@ -64,6 +64,10 @@ Every run persists to `ev_runs` with its full scenario parameters, assumption li
 ## Seeded RNG & reproducibility
 
 All simulation uses a seeded PRNG (mulberry32). Given the same inputs and seed, every published EV range is exactly reproducible.
+
+## The AI explainer
+
+The AI explainer is commentary on the estimates above — it is given only the numbers shown on the page, told which are assumptions, and instructed to refuse buy/sell advice. Its output always carries the same not-financial-advice caveat, enforced server-side rather than trusted to the model. It is optional: without an `ANTHROPIC_API_KEY`, the feature does not appear.
 
 ## Politeness & safety practices
 

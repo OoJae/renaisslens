@@ -14,3 +14,47 @@ body {
     border-radius: 2px;
   }
 }
+
+@layer components {
+  /* the in-app Methodology page — markdown rendered from METHODOLOGY.md */
+  .methodology {
+    @apply max-w-3xl text-sm leading-relaxed text-zinc-300;
+  }
+  .methodology h1 {
+    @apply mb-2 font-display text-3xl font-bold text-zinc-50;
+  }
+  .methodology h2 {
+    @apply mb-3 mt-10 border-b border-vault-700 pb-2 font-display text-lg font-medium text-zinc-100;
+  }
+  .methodology p {
+    @apply mb-4;
+  }
+  .methodology em {
+    @apply text-zinc-400;
+  }
+  .methodology strong {
+    @apply font-semibold text-zinc-100;
+  }
+  .methodology code {
+    @apply rounded bg-vault-800 px-1 py-0.5 font-mono text-[0.85em] text-prism;
+  }
+  .methodology ul,
+  .methodology ol {
+    @apply mb-4 space-y-2 pl-5;
+  }
+  .methodology ul {
+    @apply list-disc;
+  }
+  .methodology ol {
+    @apply list-decimal;
+  }
+  .methodology table {
+    @apply mb-4 block w-full overflow-x-auto text-sm;
+  }
+  .methodology th {
+    @apply border border-vault-700 bg-vault-900 px-3 py-2 text-left font-display font-medium text-zinc-400;
+  }
+  .methodology td {
+    @apply border border-vault-800 px-3 py-2 align-top;
+  }
+}

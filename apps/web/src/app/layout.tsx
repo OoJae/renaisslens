@@ -39,13 +39,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <span className="text-sm text-zinc-500">is this pack +EV, or are you donating?</span>
             <nav
               aria-label="Primary"
-              className="ml-auto flex gap-4 font-display text-sm text-zinc-400"
+              className="ml-auto flex flex-wrap items-baseline gap-4 font-display text-sm text-zinc-400"
             >
               <Link href="/" className="hover:text-zinc-100">
                 Packs
               </Link>
               <Link href="/market" className="hover:text-zinc-100">
                 Market
+              </Link>
+              <Link href="/methodology" className="hover:text-zinc-100">
+                Methodology
+              </Link>
+              <Link href="/fairness" className="flex items-baseline gap-1 hover:text-zinc-100">
+                Fairness
+                <span className="rounded border border-vault-700 px-1 py-0.5 text-[9px] uppercase tracking-[0.14em] text-zinc-500">
+                  soon
+                </span>
               </Link>
             </nav>
           </header>
