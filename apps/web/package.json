@@ -9,9 +9,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@renaisslens/db": "workspace:*",
     "@renaisslens/ev-engine": "workspace:*",
     "better-sqlite3": "^12.2.0",
+    "marked": "^18.0.5",
     "next": "14.2.33",
     "react": "18.3.1",
     "react-dom": "18.3.1"

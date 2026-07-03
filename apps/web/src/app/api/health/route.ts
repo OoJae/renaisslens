@@ -16,6 +16,7 @@ export function GET() {
     db = openDb(undefined, { readonly: true })
     const body = {
       ok: true,
+      explainerConfigured: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
       dataMode: getDataMode(db),
       demoCapturedAt: getMeta(db, 'demo_captured_at'),
       rows: {
