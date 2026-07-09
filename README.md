@@ -4,6 +4,8 @@
 
 **Estimates from public data. Not financial advice. Not affiliated with Renaiss.**
 
+**Live: <https://renaisslens-production.up.railway.app>** · Renaiss Tech Hackathon S1 (Tool track) · [submission notes](SUBMISSION.md)
+
 ## Quickstart
 
 ```bash
@@ -43,11 +45,39 @@ compatible provider. Configure with three env vars: `ANTHROPIC_API_KEY` (the end
 
 ## Screenshots
 
-_(coming with the final polish milestone)_
+Live deployment, real data — every metric carries its own scrape timestamp.
+
+| | |
+|---|---|
+| **Packs** — one verdict per pack, EV always a range | ![Pack grid with EV ranges and verdict badges](docs/screenshots/home.png) |
+| **Pack detail** — Monte Carlo histogram, sensitivity ladder, labeled assumptions | ![Omega pack detail](docs/screenshots/pack-omega.png) |
+| **Market** — sales pulse, categorized feed, two-sided listing-anomaly radar | ![Market intelligence](docs/screenshots/market.png) |
 
 ## Demo video
 
-_(link placeholder — recorded before submission)_
+_**TODO: link goes here before submission.**_
+
+## Deployment
+
+The live instance runs on [Railway](https://railway.com) from the committed
+[`Dockerfile`](Dockerfile) (config in [`railway.json`](railway.json)):
+
+- **Full-monorepo image** — the app resolves every path from the workspace root, so the
+  container ships the whole workspace and runs it the same way `pnpm dev` does.
+- **Persistent volume at `/app/data`** — SQLite + snapshots survive redeploys. On a fresh
+  volume the entrypoint seeds the committed demo snapshots from an image bake, so the
+  dashboard is populated before the first live scrape completes.
+- **One container, two processes** — [`docker/entrypoint.sh`](docker/entrypoint.sh) starts the
+  polite ingestion watch loop in the background under a restart supervisor (a scraper crash
+  never takes the site down) and runs the web server in the foreground behind a
+  [`/api/health`](https://renaisslens-production.up.railway.app/api/health) readiness gate.
+- **Single replica on purpose** — SQLite has one writer; the in-memory explainer cache and
+  rate limiter assume one process.
+- Judging-week uptime is watched by a [15-minute canary](.github/workflows/uptime.yml).
+
+Deploying your own: `railway init && railway volume add --mount-path /app/data && railway up`.
+No env vars required; set the three explainer vars from [.env.example](.env.example) if you
+want the AI explainer.
 
 ## Data sources
 
