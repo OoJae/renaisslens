@@ -50,11 +50,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/methodology" className="hover:text-zinc-100">
                 Methodology
               </Link>
-              <Link href="/fairness" className="flex items-baseline gap-1 hover:text-zinc-100">
+              <Link href="/fairness" className="hover:text-zinc-100">
                 Fairness
-                <span className="rounded border border-vault-700 px-1 py-0.5 text-[9px] uppercase tracking-[0.14em] text-zinc-500">
-                  soon
-                </span>
               </Link>
             </nav>
           </header>
