@@ -50,7 +50,8 @@ Live deployment, real data — every metric carries its own scrape timestamp.
 | | |
 |---|---|
 | **Packs** — one verdict per pack, EV always a range | ![Pack grid with EV ranges and verdict badges](docs/screenshots/home.png) |
-| **Pack detail** — Monte Carlo histogram, sensitivity ladder, labeled assumptions | ![Omega pack detail](docs/screenshots/pack-omega.png) |
+| **Pack detail** — Monte Carlo histogram, a confidence-over-time curve (the EV range narrowing as pulls accumulate), sensitivity ladder, labeled assumptions | ![Omega pack detail](docs/screenshots/pack-omega.png) |
+| **Fairness observatory** — observed per-tier pull frequencies with Wilson confidence intervals + a claimed-EV-vs-observed reconciliation (observes outcomes, verifies nothing it can't) | ![Fairness observatory](docs/screenshots/fairness.png) |
 | **Market** — sales pulse, categorized feed, two-sided listing-anomaly radar | ![Market intelligence](docs/screenshots/market.png) |
 
 ## Demo video
