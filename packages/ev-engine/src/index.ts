@@ -1,4 +1,12 @@
 export {
+  bootstrapMeanCI,
+  jeffreysInterval,
+  type MeanInterval,
+  type ProportionInterval,
+  wilsonInterval,
+  Z_95,
+} from './intervals'
+export {
   buildTierStats,
   type MixtureParams,
   type ModelFamily,
