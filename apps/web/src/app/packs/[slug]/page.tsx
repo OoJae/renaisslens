@@ -3,6 +3,7 @@ import {
   type Database,
   type DataMode,
   type EvRunRow,
+  evRunHistory,
   getDataMode,
   getMeta,
   latestEvRuns,
@@ -18,12 +19,18 @@ import { HEADLINE_SCENARIO, MIN_PULLS_FOR_EV, type Verdict } from '@renaisslens/
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AssumptionsPanel } from '@/components/assumptions-panel'
+import { ConfidenceOverTime } from '@/components/confidence-over-time'
 import { ExplainButton } from '@/components/explain-button'
 import { MonteCarloHistogram, type ScenarioHistogramData } from '@/components/monte-carlo-histogram'
 import { SensitivityTable } from '@/components/sensitivity-table'
 import { SlabBadge } from '@/components/slab-badge'
 import { usd } from '@/lib/format'
-import { type ScenarioRun, toScenarioRun } from '@/lib/pack-data'
+import {
+  type ConfidencePoint,
+  type ScenarioRun,
+  toConfidenceSeries,
+  toScenarioRun,
+} from '@/lib/pack-data'
 import { orderRuns, packEv } from '@/lib/verdict-ui'
 
 export const dynamic = 'force-dynamic'
@@ -40,6 +47,7 @@ type PackDetailResult =
       pullCount: number
       recentPulls: PullRow[]
       tiers: TierBucket[]
+      confidenceSeries: ConfidencePoint[]
       mode: DataMode
       capturedAt: string | null
     }
@@ -62,6 +70,12 @@ function readPackDetail(slug: string): PackDetailResult {
       { runs: runs.map((r) => r.row), pullCount },
       pack.price_cents,
     )
+    let confidenceSeries: ConfidencePoint[] = []
+    try {
+      confidenceSeries = toConfidenceSeries(evRunHistory(db, slug, HEADLINE_SCENARIO))
+    } catch {
+      confidenceSeries = [] // pre-0002 schema or malformed blob → no curve, not a crash
+    }
     return {
       kind: 'ok',
       pack,
@@ -71,6 +85,7 @@ function readPackDetail(slug: string): PackDetailResult {
       pullCount,
       recentPulls: latestPulls(db, slug, 10),
       tiers: tierDistribution(db, slug),
+      confidenceSeries,
       mode: getDataMode(db),
       capturedAt: getMeta(db, 'demo_captured_at'),
     }
@@ -92,7 +107,18 @@ export default function PackDetail({ params }: { params: { slug: string } }) {
       </p>
     )
   }
-  const { pack, runs, verdict, reason, pullCount, recentPulls, tiers, mode, capturedAt } = result
+  const {
+    pack,
+    runs,
+    verdict,
+    reason,
+    pullCount,
+    recentPulls,
+    tiers,
+    confidenceSeries,
+    mode,
+    capturedAt,
+  } = result
   const neutral = runs.find((r) => r.row.scenario === HEADLINE_SCENARIO)
   const insufficient = runs.length === 0 || pullCount < MIN_PULLS_FOR_EV
   // env is server-only; only this boolean crosses the RSC boundary — a keyless
@@ -181,6 +207,17 @@ export default function PackDetail({ params }: { params: { slug: string } }) {
               )}
               priceCents={pack.price_cents}
               initialScenario={HEADLINE_SCENARIO}
+            />
+          </section>
+
+          <section>
+            <h3 className="mb-3 font-display text-lg font-medium text-zinc-100">
+              How the range has evolved as pulls accumulated
+            </h3>
+            <ConfidenceOverTime
+              points={confidenceSeries}
+              scenario={HEADLINE_SCENARIO}
+              priceCents={pack.price_cents}
             />
           </section>
 
