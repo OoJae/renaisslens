@@ -54,6 +54,8 @@ program
   .action(async () => {
     const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
     const nextDue: Record<string, number> = {}
+    // hourly housekeeping so long-running deploys don't accumulate live/ snapshots forever
+    let pruneDue = Date.now() + 60 * 60_000
     console.log('watch: cadences', CONFIG.cadences)
     for (;;) {
       for (const group of Object.keys(CONFIG.cadences)) {
@@ -63,6 +65,15 @@ program
         const cadence = CONFIG.cadences[group] ?? 30 * 60_000
         const jitter = cadence * 0.1 * (Math.random() * 2 - 1)
         nextDue[group] = Date.now() + cadence + jitter
+      }
+      if (Date.now() >= pruneDue) {
+        try {
+          const { deleted } = pruneLive(48)
+          if (deleted > 0) console.log(`watch: pruned ${deleted} old live snapshot dir(s)`)
+        } catch (err) {
+          console.error(`watch: prune failed — ${String(err instanceof Error ? err.message : err)}`)
+        }
+        pruneDue = Date.now() + 60 * 60_000
       }
       await sleep(60_000)
     }
