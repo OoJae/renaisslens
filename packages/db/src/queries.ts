@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type {
   DataMode,
+  EvRunHistoryRow,
   EvRunRow,
   ListingAnomalyRow,
   NewEvRun,
@@ -9,6 +10,7 @@ import type {
   NewPull,
   NewSale,
   NewSnapshot,
+  ObservatoryPullRow,
   PackRow,
   PullRow,
   SaleRow,
@@ -160,6 +162,18 @@ export function tierDistribution(db: Database, slug: string): TierBucket[] {
        FROM pack_pulls WHERE pack_slug = ? GROUP BY tier ORDER BY avg_fmv_cents DESC`,
     )
     .all(slug) as TierBucket[]
+}
+
+/**
+ * Every observed pull, raw (unrounded fmv_cents), for the fairness observatory.
+ * One tab-level read grouped in TS — avoids N+1 per-pack calls and the integer
+ * rounding of tierDistribution's AVG (which would bias the observed-mean CI).
+ * Deterministic `id` order keeps the seeded bootstrap reproducible.
+ */
+export function observatoryPulls(db: Database): ObservatoryPullRow[] {
+  return db
+    .prepare(`SELECT pack_slug, tier, fmv_cents FROM pack_pulls ORDER BY pack_slug ASC, id ASC`)
+    .all() as ObservatoryPullRow[]
 }
 
 // ── listings ─────────────────────────────────────────────────────────────────
@@ -336,6 +350,24 @@ export function latestEvRuns(db: Database): EvRunRow[] {
        ORDER BY pack_slug ASC, scenario ASC`,
     )
     .all() as EvRunRow[]
+}
+
+/**
+ * Full append-only history for one (pack, scenario), oldest→newest — the
+ * confidence-over-time read. Lean columns only: `params_json` carries the whole
+ * histogram per row, so `SELECT *` would bloat the payload N×. `observed_pull_count`
+ * is extracted from `assumptions_json` in TS (SQLite's json_extract throws on a
+ * malformed blob; the TS parser degrades gracefully instead). Uses the existing
+ * idx_ev_runs_pack_scenario_time index; `id` tiebreaks equal `ran_at`.
+ */
+export function evRunHistory(db: Database, packSlug: string, scenario: string): EvRunHistoryRow[] {
+  return db
+    .prepare(
+      `SELECT id, ran_at, p10_cents, p50_cents, p90_cents, assumptions_json
+       FROM ev_runs WHERE pack_slug = ? AND scenario = ?
+       ORDER BY ran_at ASC, id ASC`,
+    )
+    .all(packSlug, scenario) as EvRunHistoryRow[]
 }
 
 // ── source status / freshness ────────────────────────────────────────────────

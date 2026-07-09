@@ -172,6 +172,13 @@ export interface TierBucket {
   max_fmv_cents: number
 }
 
+/** One observed pull, raw — for the fairness observatory (unrounded fmv_cents). */
+export interface ObservatoryPullRow {
+  pack_slug: string
+  tier: string
+  fmv_cents: number
+}
+
 export interface EvRunRow {
   id: number
   pack_slug: string
@@ -189,6 +196,16 @@ export interface EvRunRow {
   assumptions_json: string
   input_snapshot_ids: string | null
   ran_at: string
+}
+
+/** Lean projection of ev_runs history — the confidence-over-time read. */
+export interface EvRunHistoryRow {
+  id: number
+  ran_at: string
+  p10_cents: number | null
+  p50_cents: number | null
+  p90_cents: number | null
+  assumptions_json: string
 }
 
 export interface NewEvRun {

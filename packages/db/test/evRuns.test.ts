@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { NewEvRun } from '../src/index'
-import { countRows, insertEvRun, latestEvRuns, openDb, runMigrations } from '../src/index'
+import {
+  countRows,
+  evRunHistory,
+  insertEvRun,
+  latestEvRuns,
+  openDb,
+  runMigrations,
+} from '../src/index'
 
 function freshDb() {
   const db = openDb(':memory:')
@@ -75,6 +82,41 @@ describe('ev_runs persistence', () => {
     const db = freshDb()
     insertEvRun(db, run({}), '2026-07-03T10:00:00Z')
     expect(latestEvRuns(db)[0]?.input_snapshot_ids).toBeNull()
+    db.close()
+  })
+})
+
+describe('evRunHistory', () => {
+  it('returns ALL runs for a (pack, scenario), oldest→newest, not just latest', () => {
+    const db = freshDb()
+    insertEvRun(db, run({ p90Cents: 20000 }), '2026-07-03T10:00:00Z')
+    insertEvRun(db, run({ p90Cents: 16000 }), '2026-07-03T11:00:00Z')
+    insertEvRun(db, run({ p90Cents: 12000 }), '2026-07-03T12:00:00Z')
+
+    const history = evRunHistory(db, 'omega', 'neutral')
+    expect(history).toHaveLength(3)
+    expect(history.map((r) => r.p90_cents)).toEqual([20000, 16000, 12000])
+    expect(history[0]?.ran_at).toBe('2026-07-03T10:00:00Z')
+    db.close()
+  })
+
+  it('filters by both pack and scenario', () => {
+    const db = freshDb()
+    insertEvRun(db, run({ scenario: 'neutral' }), '2026-07-03T10:00:00Z')
+    insertEvRun(db, run({ scenario: 'generous' }), '2026-07-03T10:00:00Z')
+
+    expect(evRunHistory(db, 'omega', 'neutral')).toHaveLength(1)
+    expect(evRunHistory(db, 'omega', 'generous')).toHaveLength(1)
+    expect(evRunHistory(db, 'omega', 'house-favored')).toHaveLength(0)
+    db.close()
+  })
+
+  it('breaks ran_at ties deterministically by id', () => {
+    const db = freshDb()
+    insertEvRun(db, run({ p50Cents: 100 }), '2026-07-03T10:00:00Z')
+    insertEvRun(db, run({ p50Cents: 200 }), '2026-07-03T10:00:00Z')
+    const history = evRunHistory(db, 'omega', 'neutral')
+    expect(history.map((r) => r.p50_cents)).toEqual([100, 200])
     db.close()
   })
 })
