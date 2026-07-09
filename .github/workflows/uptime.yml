@@ -1,0 +1,25 @@
+# Judging-week uptime canary: a failed run (= failure email) is the alert.
+# Self-disables after 2026-07-15 when judging ends.
+name: uptime
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check /api/health
+        run: |
+          if [ "$(date -u +%Y%m%d)" -gt 20260715 ]; then
+            echo "judging window over — skipping"
+            exit 0
+          fi
+          body=$(curl -sS --max-time 30 -w '\n%{http_code}' \
+            https://renaisslens-production.up.railway.app/api/health)
+          code=${body##*$'\n'}
+          echo "HTTP $code"
+          echo "${body%$'\n'*}"
+          [ "$code" = "200" ] || exit 1
+          echo "${body%$'\n'*}" | grep -q '"ok":true' || exit 1
