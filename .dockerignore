@@ -1,0 +1,42 @@
+# version control / CI
+.git
+.github
+
+# build + install outputs (recreated inside the image)
+node_modules
+**/node_modules
+apps/web/.next
+out
+
+# secrets — .env.example is the ONLY env file allowed in the build context
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+
+# sqlite runtime state (the image builds its own throwaway db, the volume holds the real one)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# live snapshots are runtime state; the curated demo set ships in the image
+data/snapshots/live
+
+# planning docs — not part of the shipped app
+CLAUDE_CODE_MASTER_PROMPT*.md
+RENAISSLENS_BUILD_PLAN.md
+RESEARCH_*.md
+SUBMISSION.md
+DEMO_SCRIPT.md
+
+# test + tooling artifacts
+test-results
+playwright-report
+.playwright
+coverage
+*.log
+*.tsbuildinfo
+.DS_Store
+docs/screenshots

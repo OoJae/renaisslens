@@ -1,0 +1,20 @@
+# Excluded from the `railway up` upload archive (additive to .gitignore).
+
+# secrets — defense in depth; already gitignored
+.env
+.env.*
+apps/web/.env.local
+
+# planning docs — untracked locally, never shipped anywhere
+CLAUDE_CODE_MASTER_PROMPT*.md
+RENAISSLENS_BUILD_PLAN.md
+RESEARCH_*.md
+DEMO_SCRIPT.md
+
+# heavy or irrelevant to the build
+node_modules
+apps/web/.next
+data/*.db
+data/*.db-*
+data/snapshots/live
+docs/screenshots
