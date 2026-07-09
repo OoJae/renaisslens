@@ -9,6 +9,7 @@ import {
 } from '@renaisslens/db'
 import { ZodError } from 'zod'
 import { getHomepage, getMarketplacePage, getPackDetail, getPacks } from './api/client'
+import { runIndexSource } from './api/indexPricing'
 import { CONFIG } from './config'
 import { runEv } from './ev'
 import { loadListings, loadPacks, loadPulls, loadSales } from './load'
@@ -124,6 +125,7 @@ export const SOURCE_GROUPS = [
   'api-pack-details',
   'api-marketplace',
   'site-home-activities',
+  'api-index',
 ] as const
 
 export async function runCycle(opts: { only?: string; db?: Database } = {}): Promise<CycleReport> {
@@ -383,8 +385,16 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
     }
   }
 
-  // only claim live mode when at least one source actually ingested live data
-  if (reports.some((r) => r.status === 'ok')) {
+  // ── 5. index pricing (dormant) ───────────────────────────────────────────
+  // Registered so `--source api-index` is discoverable, but benign-skips with
+  // no network call until the integration is activated.
+  if (want('api-index')) {
+    reports.push(await runIndexSource())
+  }
+
+  // only claim live mode when at least one source actually INGESTED live data —
+  // the dormant index skip reports 'ok' but ingests nothing, so exclude it
+  if (reports.some((r) => r.status === 'ok' && r.source !== 'api-index')) {
     setMeta(db, 'data_mode', 'live')
     // Recompute EV only when a source that changes EV inputs (packs or pulls)
     // succeeded — a marketplace- or activities-only sweep (watch mode runs each

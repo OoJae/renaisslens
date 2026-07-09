@@ -3,6 +3,11 @@ export const CONFIG = {
   apiBaseUrl: process.env.RENAISS_API_URL ?? 'https://api.renaiss.xyz',
   siteBaseUrl: process.env.RENAISS_SITE_URL ?? 'https://www.renaiss.xyz',
 
+  // Renaiss Index API — external reference prices to cross-check FMV. PLANNED,
+  // not integrated: we have the host but no documented endpoint/response schema.
+  // Base URL only; the key gates the (currently dormant) source.
+  indexApiBaseUrl: process.env.RENAISS_INDEX_API_URL ?? 'https://api.renaissos.com',
+
   // Politeness — self-imposed; the API publishes no rate limits (documented in METHODOLOGY.md)
   userAgent:
     'RenaissLens-Hackathon/1.0 (Renaiss Tech Hackathon S1 entry; contact: olamiyeoluwademilade@gmail.com)',
@@ -17,7 +22,9 @@ export const CONFIG = {
   marketplacePages: 3,
   marketplacePageSize: 100,
 
-  // watch-loop cadences (ms)
+  // watch-loop cadences (ms). NOTE: 'api-index' is deliberately absent — the
+  // watch loop iterates these keys, and a parser-less source must never be
+  // polled. Its cadence is added only when the index integration is activated.
   cadences: {
     'api-packs': 30 * 60_000,
     'api-pack-details': 30 * 60_000,
@@ -25,3 +32,12 @@ export const CONFIG = {
     'site-home-activities': 30 * 60_000,
   } as Record<string, number>,
 } as const
+
+/**
+ * Call-time gate for the (planned) Index API — mirrors the AI explainer's
+ * `Boolean(process.env.ANTHROPIC_API_KEY?.trim())`. A function, not a value
+ * baked into the frozen CONFIG at import, so a restarted process / test sees
+ * the current env. Note: even once keyed, the index source stays dormant until
+ * a real parser lands (see docs/index-api-activation.md).
+ */
+export const indexApiConfigured = (): boolean => Boolean(process.env.RENAISS_INDEX_API_KEY?.trim())

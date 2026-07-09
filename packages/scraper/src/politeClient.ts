@@ -48,7 +48,13 @@ export interface PoliteResponse {
  */
 export async function politeGet(
   url: string,
-  opts: { source: string; timeoutMs?: number; accept?: string } = { source: 'unknown' },
+  opts: {
+    source: string
+    timeoutMs?: number
+    accept?: string
+    /** Extra headers (e.g. Authorization for a keyed API). Cannot override the identified UA. */
+    headers?: HeadersInit
+  } = { source: 'unknown' },
 ): Promise<PoliteResponse> {
   const timeoutMs = opts.timeoutMs ?? CONFIG.apiTimeoutMs
   let lastError: unknown
@@ -64,9 +70,12 @@ export async function politeGet(
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const res = await fetch(url, {
+        // order is load-bearing: opts.headers may ADD auth (and override accept),
+        // but 'user-agent' is forced last so the identified UA can never be stripped
         headers: {
-          'user-agent': CONFIG.userAgent,
           accept: opts.accept ?? 'application/json',
+          ...(opts.headers as Record<string, string> | undefined),
+          'user-agent': CONFIG.userAgent,
         },
         signal: controller.signal,
         redirect: 'follow',
