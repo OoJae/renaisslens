@@ -232,6 +232,26 @@ export default function Market() {
         </div>
       </section>
 
+      <section className="max-w-2xl">
+        <div className="overflow-hidden rounded-sm border border-zinc-700/60 bg-zinc-900/60">
+          <div className="h-1 bg-vault-700" />
+          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-1.5">
+            <span className="font-display text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
+              RenaissLens · Index Cross-Pricing
+            </span>
+            <span className="rounded border border-zinc-700 px-1.5 py-0.5 font-display text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+              Planned
+            </span>
+          </div>
+          <div className="px-4 pb-3 pt-2 text-xs leading-relaxed text-zinc-400">
+            Every FMV figure above is Renaiss&apos;s own valuation. Independent cross-referencing
+            against the Renaiss Index API (<code>api.renaissos.com</code>) is planned and not yet
+            integrated — it needs a key and a documented response schema. Until it lands, we label
+            FMV honestly rather than guess a second price.
+          </div>
+        </div>
+      </section>
+
       <section className="text-xs text-zinc-500">
         <h2 className="mb-2 font-display text-sm font-medium text-zinc-300">Data freshness</h2>
         <ul className="space-y-0.5">

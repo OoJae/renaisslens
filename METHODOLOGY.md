@@ -6,7 +6,7 @@ _This document is the single source of truth for how RenaissLens collects data, 
 
 - **Renaiss public API (`api.renaiss.xyz`)** — no auth, no key; the same API the official `npx renaiss` CLI wraps. We call read-only endpoints: `/v0/packs`, `/v0/packs/{slug}`, `/v0/marketplace`. Our client exposes only GET wrappers; write endpoints are unreachable by construction.
 - **`www.renaiss.xyz` homepage** — the "Latest Activities" sales feed is not exposed by the API, so we parse it from the server-rendered page (with a Playwright DOM fallback, whose rows are flagged lower-confidence).
-- **Renaiss Index API (`api.renaissos.com`)** — _planned_ external reference prices (cross-marketplace sales). Not yet integrated; until then all FMV figures are Renaiss's own valuations.
+- **Renaiss Index API (`api.renaissos.com`)** — _planned_ external reference prices (cross-marketplace sales). Not yet integrated; until then all FMV figures are Renaiss's own valuations. The dormant scaffolding and the exact activation contract live in [`docs/index-api-activation.md`](docs/index-api-activation.md).
 
 Politeness: identified User-Agent `RenaissLens-Hackathon/1.0`, a single serial request queue with ≥2s spacing across all collectors, jittered exponential backoff honoring `Retry-After`, ~9 requests per cycle. The API publishes no rate limits; these constraints are self-imposed.
 
@@ -64,6 +64,17 @@ Every run persists to `ev_runs` with its full scenario parameters, assumption li
 ## Seeded RNG & reproducibility
 
 All simulation uses a seeded PRNG (mulberry32). Given the same inputs and seed, every published EV range is exactly reproducible.
+
+## Observed-outcomes fairness observatory
+
+The `/fairness` tab shows what the public pull feed **actually paid out** — it does not, and cannot, verify that the draws are fair. True fairness verification needs Renaiss's commitment scheme (server-seed commitments and Merkle roots), which is not public; that half of the tab is shipped disabled as a roadmap item.
+
+What the observatory computes from data already collected:
+
+- **Per-tier empirical frequency with a 95% Wilson score interval.** For each pack tier, the observed share `k/n` and a closed-form Wilson interval. Wilson is preferred over a Jeffreys binomial interval because it needs no special functions and stays sensible at `k = 0`, `k = n`, and small `n`; it applies the same Jeffreys-0.5 skepticism the EV engine uses, but is **not** numerically identical to the engine's Dirichlet marginal (which spreads 0.5 across every tier).
+- **Claimed-EV-vs-observed reconciliation.** Renaiss's single advertised EV beside the mean realized FMV of the observed pulls, with a seeded 95% bootstrap CI on that mean (bootstrap because pull FMVs are heavy-tailed). This is the only honest "claimed vs observed" comparison available — Renaiss publishes **no per-tier odds**, so there is no claimed distribution to run a goodness-of-fit test against.
+
+Two honesty constraints are load-bearing here. First, both sides of the reconciliation rest on Renaiss's own FMV valuations (limitation #4), so it is an internal-consistency check, **not** an independent price check — that awaits the Index API. Second, every frequency is a frequency in the *observed* feed, whose completeness is unknown (limitation #1); a gap between observed and claimed is a flag for scrutiny, **never proof of unfairness**, because feed curation explains a gap equally well. Packs below the 20-pull EV threshold show no distribution at all.
 
 ## The AI explainer
 

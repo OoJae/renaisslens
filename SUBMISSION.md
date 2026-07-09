@@ -39,7 +39,7 @@ _**TODO(user): paste your recording link here before submitting.**_
 ### Ecosystem relevance
 
 - Built entirely on Renaiss's own public surfaces: `api.renaiss.xyz` (packs, pull feed, marketplace) and the homepage sales feed.
-- The **Fairness tab** is deliberately a roadmap page: it reserves the spot for verifying Renaiss's provably-fair commitments the day they open-source their odds pipeline — the tool is designed to grow with the platform.
+- The **Fairness tab** does the honest half now and reserves the rest: a live **observed-outcomes observatory** (per-tier empirical pull frequencies with Wilson confidence intervals + a claimed-EV-vs-observed reconciliation) sits above a deliberately-disabled **cryptographic pull-verification** roadmap section — which activates the day Renaiss open-sources its commitment scheme. It observes what it can, verifies nothing it can't.
 - Marketplace "listing anomaly" radar surfaces mispriced listings *in both directions* — useful to buyers and to Renaiss's own market health.
 
 ### Clarity
