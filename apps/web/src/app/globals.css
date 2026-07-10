@@ -13,6 +13,127 @@ body {
     outline-offset: 2px;
     border-radius: 2px;
   }
+
+  /* ── RenaissProof brand: fluid type scale (line-height tightens as size grows) ── */
+  :root {
+    --step-hero: clamp(2.75rem, 1.6rem + 6.1vw, 7rem);
+    --step-section: clamp(2rem, 1.3rem + 3vw, 3.75rem);
+    --step-lead: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+    --step-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --step-label: clamp(0.6875rem, 0.65rem + 0.15vw, 0.8125rem);
+    --step-cert: clamp(0.6875rem, 0.65rem + 0.1vw, 0.8125rem);
+    --step-num: clamp(0.75rem, 0.7rem + 0.2vw, 0.9375rem);
+  }
+}
+
+@layer components {
+  /* couture display — Fraunces, used with restraint (hero + section titles + one pull-quote) */
+  .type-hero {
+    font-family: theme('fontFamily.couture');
+    font-size: var(--step-hero);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    font-weight: 380;
+    color: theme('colors.bone.50');
+  }
+  .type-section {
+    font-family: theme('fontFamily.couture');
+    font-size: var(--step-section);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    font-weight: 380;
+    color: theme('colors.bone.50');
+  }
+  .type-lead {
+    font-family: theme('fontFamily.sans');
+    font-size: var(--step-lead);
+    line-height: 1.5;
+    color: theme('colors.bone.50');
+  }
+  /* structure/UI voice — Space Grotesk, open-tracked uppercase labels */
+  .type-eyebrow {
+    font-family: theme('fontFamily.display');
+    font-size: var(--step-label);
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: theme('colors.fog');
+  }
+  /* cert / proof data — Space Mono, tabular */
+  .type-cert {
+    font-family: theme('fontFamily.mono');
+    font-size: var(--step-cert);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .type-num {
+    font-family: theme('fontFamily.mono');
+    font-size: var(--step-num);
+    letter-spacing: 0.24em;
+    color: theme('colors.fog');
+  }
+
+  /* the holographic foil — a 4-stop diffraction spectrum (not a 2-stop UI gradient).
+     angle is driven by pointer/scroll via --holo-angle; facet lives ONLY in here. */
+  .holo-foil {
+    background: conic-gradient(
+      from var(--holo-angle, 210deg),
+      theme('colors.prism'),
+      theme('colors.facet'),
+      theme('colors.holo.mint'),
+      theme('colors.holo.rose'),
+      theme('colors.prism')
+    );
+  }
+  /* clip the foil to text for the single holographic hero word */
+  .holo-text {
+    background: conic-gradient(
+      from 200deg,
+      theme('colors.prism'),
+      theme('colors.facet'),
+      theme('colors.holo.mint'),
+      theme('colors.holo.rose'),
+      theme('colors.prism')
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* the reusable authentication line — a 1px prism→facet rule that draws left→right */
+  .auth-line {
+    height: 1px;
+    background: linear-gradient(90deg, theme('colors.prism'), theme('colors.facet'));
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .auth-line[data-in='true'] {
+    transform: scaleX(1);
+  }
+}
+
+@layer utilities {
+  /* ── the film: fixed, pointer-events-none, rendered once, no per-frame cost ── */
+  .film-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .film-vignette {
+    background: radial-gradient(
+      ellipse 120% 100% at 50% 42%,
+      transparent 55%,
+      rgba(6, 4, 9, 0.55) 100%
+    );
+  }
+}
+
+/* reduced motion: the auth line is drawn, holo angle is fixed, nothing sweeps */
+@media (prefers-reduced-motion: reduce) {
+  .auth-line {
+    transition: none;
+    transform: scaleX(1);
+  }
 }
 
 @layer components {

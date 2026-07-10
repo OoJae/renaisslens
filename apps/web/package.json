@@ -10,18 +10,25 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
+    "@react-three/drei": "9.114.0",
+    "@react-three/fiber": "8.17.10",
     "@renaisslens/db": "workspace:*",
     "@renaisslens/ev-engine": "workspace:*",
     "better-sqlite3": "^12.2.0",
+    "gsap": "3.12.5",
+    "lenis": "1.1.14",
     "marked": "^18.0.5",
     "next": "14.2.35",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "three": "0.169.0",
+    "zustand": "4.5.5"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@types/three": "0.169.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.0",
     "tailwindcss": "^3.4.17"
