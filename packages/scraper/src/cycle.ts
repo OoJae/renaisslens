@@ -385,15 +385,16 @@ export async function runCycle(opts: { only?: string; db?: Database } = {}): Pro
     }
   }
 
-  // ── 5. index pricing (dormant) ───────────────────────────────────────────
-  // Registered so `--source api-index` is discoverable, but benign-skips with
-  // no network call until the integration is activated.
+  // ── 5. Renaiss OS Index cross-pricing ────────────────────────────────────
+  // Fetches the index panel + exact-matches listings against /v1/search. Skips
+  // (no network) when unkeyed. Supplementary reference data, so it does NOT
+  // flip data_mode — the core dashboard's mode tracks packs/pulls/listings.
   if (want('api-index')) {
-    reports.push(await runIndexSource())
+    reports.push(await runIndexSource(db))
   }
 
-  // only claim live mode when at least one source actually INGESTED live data —
-  // the dormant index skip reports 'ok' but ingests nothing, so exclude it
+  // only claim live mode when a CORE source actually ingested live data — the
+  // index is supplementary reference data, so exclude it from the mode flip
   if (reports.some((r) => r.status === 'ok' && r.source !== 'api-index')) {
     setMeta(db, 'data_mode', 'live')
     // Recompute EV only when a source that changes EV inputs (packs or pulls)
