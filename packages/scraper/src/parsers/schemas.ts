@@ -24,7 +24,13 @@ export const TierSchema = z.string().min(1).max(32)
 
 export const PackSchema = z
   .object({
-    slug: z.string().min(1),
+    // slug reaches the filesystem (snapshot dir) and DB — constrain to a safe
+    // charset so a hostile/malformed slug quarantines rather than being trusted
+    // (the snapshot store also sanitizes, defense in depth).
+    slug: z
+      .string()
+      .min(1)
+      .regex(/^[a-zA-Z0-9._-]+$/, 'slug must be url/path-safe'),
     name: z.string().min(1),
     packType: PackTypeSchema,
     stage: PackStageSchema,

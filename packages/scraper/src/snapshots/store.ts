@@ -8,7 +8,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { snapshotsRoot } from '@renaisslens/db'
 
@@ -45,9 +45,18 @@ function tsDir(iso: string): string {
   return iso.replaceAll(':', '-').replaceAll('.', '-')
 }
 
-/** ':' is illegal in Windows paths — logical source names keep it, dirs don't. */
-function sourceDir(source: string): string {
-  return source.replaceAll(':', '__')
+/**
+ * Logical source names become a SINGLE safe path segment. ':' (kept in the
+ * logical name) → '__'; then any path-hostile character (including '/' and '\')
+ * is neutralized and dot-runs collapsed, so a malformed/hostile source (e.g. a
+ * beta-API pack slug like '../../etc') can never traverse out of the snapshot
+ * root. writeSnapshot also asserts the resolved dir stays under the root.
+ */
+export function sourceDir(source: string): string {
+  return source
+    .replaceAll(':', '__')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/\.{2,}/g, '_')
 }
 
 export function rootDir(root: SnapshotRootName): string {
@@ -78,6 +87,10 @@ export function writeSnapshot(input: {
   const bucket = input.status === 'quarantined' ? 'quarantine' : 'sources'
   const relDir = join(bucket, sourceDir(input.source), tsDir(input.fetchedAt))
   const dir = join(base, relDir)
+  // defense in depth: never write outside the snapshot root, whatever the source
+  if (resolve(dir) !== resolve(base) && !resolve(dir).startsWith(resolve(base) + '/')) {
+    throw new Error(`snapshot path escaped root: ${input.source}`)
+  }
   mkdirSync(dir, { recursive: true })
 
   const fileNames: string[] = []

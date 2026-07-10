@@ -428,7 +428,10 @@ export function printReport(report: { cycleId: string; sources: SourceReport[] }
     console.log(`${icon} ${pad(r.source, 30)} ${pad(r.status, 12)} ${r.detail}`)
   }
   console.log('─'.repeat(96))
-  const failed = report.sources.filter((r) => r.status !== 'ok').length
+  // 'api-index' is supplementary reference data (excluded from data_mode/EV) —
+  // its failure must not flip the exit code of a core ingestion cycle.
+  const core = report.sources.filter((r) => r.source !== 'api-index')
+  const failed = core.filter((r) => r.status !== 'ok').length
   if (failed === 0) return 0
-  return failed === report.sources.length ? 1 : 2
+  return failed === core.length ? 1 : 2
 }
