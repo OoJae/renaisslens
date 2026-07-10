@@ -330,7 +330,7 @@ export default function PackDetail({ params }: { params: { slug: string } }) {
       </section>
 
       {neutral !== undefined && (
-        <footer className="border-t border-vault-800 pt-3 font-mono text-[11px] text-zinc-500">
+        <footer className="break-all border-t border-vault-800 pt-3 font-mono text-[11px] text-zinc-500">
           provenance: snapshots {neutral.row.input_snapshot_ids ?? '—'} · seed{' '}
           {neutral.row.seed ?? '—'} · {neutral.row.iterations ?? '—'} iterations · ran{' '}
           {neutral.row.ran_at} · data mode: {mode}
