@@ -1,6 +1,6 @@
 /**
- * RenaissProof wordmark: house + proof + seal in one lockup. Space Grotesk
- * Medium; a prism→facet authentication rule under "Proof"; a gold seal-dot as
+ * RenaissLens wordmark: house + proof + seal in one lockup. Space Grotesk
+ * Medium; a prism→facet authentication rule under "Lens"; a gold seal-dot as
  * the cert period after the final f. The logotype encodes the whole brand.
  */
 export function Wordmark({ className }: { className?: string }) {
@@ -10,7 +10,7 @@ export function Wordmark({ className }: { className?: string }) {
     >
       <span>Renaiss</span>
       <span className="relative">
-        Proof
+        Lens
         <span
           aria-hidden
           className="absolute -bottom-[0.08em] left-0 h-[1.5px] w-full bg-gradient-to-r from-prism to-facet"

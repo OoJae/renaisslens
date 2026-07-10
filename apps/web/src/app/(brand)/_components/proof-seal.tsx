@@ -8,7 +8,7 @@ interface ProofSealProps {
 /**
  * The proof seal — a notary/coin stamp: micro-text ring, struck-foil field, an
  * embossed hexagonal facet (the "graded gem"). Gold is EARNED: dormant until an
- * object authenticates, then ignited. The RenaissProof mark.
+ * object authenticates, then ignited. The RenaissLens mark.
  */
 export function ProofSeal({ size = 96, ignited = true, className }: ProofSealProps) {
   const foilHi = ignited ? '#efd08a' : '#4a3f66'
@@ -24,7 +24,7 @@ export function ProofSeal({ size = 96, ignited = true, className }: ProofSealPro
       height={size}
       className={className}
       role="img"
-      aria-label={ignited ? 'RenaissProof — verified seal' : 'RenaissProof seal'}
+      aria-label={ignited ? 'RenaissLens — verified seal' : 'RenaissLens seal'}
       style={{ fontFamily: 'var(--font-mono)' }}
     >
       <defs>
@@ -45,7 +45,7 @@ export function ProofSeal({ size = 96, ignited = true, className }: ProofSealPro
       <circle cx="50" cy="50" r="37" fill="none" stroke={ring} strokeWidth="0.4" opacity="0.5" />
       <text fontSize="4.1" fill={micro} letterSpacing="1.6">
         <textPath href={`#seal-ring-${uid}`} startOffset="0">
-          · RENAISSPROOF · PROVABLE PROVENANCE · RENAISSPROOF · PROVABLE PROVENANCE
+          · RENAISSLENS · PROVABLE PROVENANCE · RENAISSLENS · PROVABLE PROVENANCE
         </textPath>
       </text>
 

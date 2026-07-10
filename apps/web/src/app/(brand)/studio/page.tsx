@@ -7,7 +7,7 @@ import { Wordmark } from '../_components/wordmark'
 export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
-  title: 'RenaissProof — a house of provable provenance',
+  title: 'RenaissLens — a house of provable provenance',
   description:
     'A gacha pull is luck. We grade it, seal it, and give it a cert number, a hash, and a provenance chain — so what you own is an object you can prove, not a promise you have to trust.',
 }
@@ -64,7 +64,7 @@ export default function Studio() {
 
       {/* ── nav ── */}
       <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between bg-gradient-to-b from-ink via-ink/70 to-transparent px-5 py-5 sm:px-10">
-        <Link href="/studio" aria-label="RenaissProof home">
+        <Link href="/studio" aria-label="RenaissLens home">
           <Wordmark className="text-base sm:text-lg" />
         </Link>
         <nav

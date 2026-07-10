@@ -10,7 +10,7 @@ import { Wordmark } from '../_components/wordmark'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'The Standard · RenaissProof',
+  title: 'The Standard · RenaissLens',
   description:
     'What we collect, what we assume, and what we cannot know — the single source of truth behind every number in the house.',
 }

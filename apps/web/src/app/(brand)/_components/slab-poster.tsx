@@ -29,11 +29,11 @@ export function SlabPoster({
   title,
 }: SlabPosterProps) {
   const proven = state === 'proven'
-  const companyText = company ?? 'RenaissProof'
+  const companyText = company ?? 'RenaissLens'
   const gradeText = grade ?? (proven ? 'Gem Mint 10' : 'Ungraded')
   const serialText = serial ?? (proven ? 'CERT · 0000000001' : '— — — — — —')
   const defaultLabel = proven
-    ? 'A RenaissProof slab: a holographic card graded Gem Mint 10, sealed in an acrylic case with a cert label and gold seal.'
+    ? 'A RenaissLens slab: a holographic card graded Gem Mint 10, sealed in an acrylic case with a cert label and gold seal.'
     : 'An ungraded card, not yet sealed or proven.'
   return (
     <div

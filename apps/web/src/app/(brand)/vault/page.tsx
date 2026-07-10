@@ -19,7 +19,7 @@ import { Wordmark } from '../_components/wordmark'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'The Vault · RenaissProof',
+  title: 'The Vault · RenaissLens',
   description:
     'Every graded object observed on the renaiss.xyz public marketplace — grade, seal, price record, and Index cross-reference. A wall of observations, not holdings.',
 }
@@ -105,8 +105,7 @@ export default function Vault() {
         <div aria-hidden className="auth-line mt-6 max-w-[8rem]" data-in="true" />
         <p className="type-lead mt-6 max-w-xl text-fog">
           Every graded object observed on renaiss.xyz&apos;s public marketplace sample — a wall of
-          observations, not holdings. RenaissProof custodies nothing, and there are no accounts
-          here.
+          observations, not holdings. RenaissLens custodies nothing, and there are no accounts here.
         </p>
         <p className="type-cert mt-8 text-fog">
           {formatInt(stats.graded)} graded objects · {formatInt(stats.withFmv)} with FMV ·{' '}

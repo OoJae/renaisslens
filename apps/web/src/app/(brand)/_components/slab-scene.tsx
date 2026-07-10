@@ -36,7 +36,7 @@ function useCertTexture() {
     x.strokeRect(14, 14, c.width - 28, c.height - 28)
     x.fillStyle = '#1a1206'
     x.font = 'bold 30px ui-sans-serif, system-ui, sans-serif'
-    x.fillText('RENAISSPROOF', 40, 66)
+    x.fillText('RENAISSLENS', 40, 66)
     x.font = 'bold 88px ui-monospace, monospace'
     x.fillText('GEM MINT 10', 38, 168)
     x.font = '30px ui-monospace, monospace'

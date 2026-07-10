@@ -10,7 +10,7 @@ import { Wordmark } from './wordmark'
 export function CertHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between bg-gradient-to-b from-ink via-ink/70 to-transparent px-5 py-5 sm:px-10">
-      <Link href="/studio" aria-label="RenaissProof home">
+      <Link href="/studio" aria-label="RenaissLens home">
         <Wordmark className="text-base sm:text-lg" />
       </Link>
       <nav aria-label="Primary" className="type-eyebrow flex items-center gap-4 text-fog sm:gap-7">

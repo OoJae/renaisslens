@@ -14,7 +14,7 @@ body {
     border-radius: 2px;
   }
 
-  /* ── RenaissProof brand: fluid type scale (line-height tightens as size grows) ── */
+  /* ── RenaissLens brand: fluid type scale (line-height tightens as size grows) ── */
   :root {
     --step-hero: clamp(2.75rem, 1.6rem + 6.1vw, 7rem);
     --step-section: clamp(2rem, 1.3rem + 3vw, 3.75rem);

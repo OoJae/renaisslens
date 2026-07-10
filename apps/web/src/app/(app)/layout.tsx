@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             Fairness
           </Link>
           <Link href="/studio" className="text-prism hover:text-zinc-100">
-            RenaissProof ↗
+            Studio ↗
           </Link>
         </nav>
       </header>

@@ -79,12 +79,12 @@ const readProof = cache((tokenId: string): ProofResult => {
 const short = (s: string): string => (s.length > 12 ? `${s.slice(0, 6)}…${s.slice(-4)}` : s)
 
 export function generateMetadata({ params }: { params: { tokenId: string } }): Metadata {
-  if (!TOKEN_RE.test(params.tokenId)) return { title: 'Proof · RenaissProof' }
+  if (!TOKEN_RE.test(params.tokenId)) return { title: 'Proof · RenaissLens' }
   const r = readProof(params.tokenId)
-  if (r.kind !== 'ok') return { title: 'Proof · RenaissProof' }
+  if (r.kind !== 'ok') return { title: 'Proof · RenaissLens' }
   const l = r.listing
   const gradeLine = [l.grading_company, l.grade].filter(Boolean).join(' ')
-  const title = `${l.name}${gradeLine ? ` — ${gradeLine}` : ''} · RenaissProof`
+  const title = `${l.name}${gradeLine ? ` — ${gradeLine}` : ''} · RenaissLens`
   const description = `Certificate of observed provenance for ${l.name}: grade, custody, price record, and content seal — assembled from public renaiss.xyz data.`
   return { title, description, openGraph: { title, description, type: 'article' } }
 }
@@ -203,7 +203,7 @@ export default function ProofPage({ params }: { params: { tokenId: string } }) {
         </p>
         <p className="type-cert mt-4 text-fog">
           {graded
-            ? `The grade belongs to ${l.grading_company} — not to RenaissProof.`
+            ? `The grade belongs to ${l.grading_company} — not to RenaissLens.`
             : 'No grade observed for this object.'}
         </p>
       </SectionShell>
@@ -363,9 +363,9 @@ export default function ProofPage({ params }: { params: { tokenId: string } }) {
               <ProofSeal size={40} className="mt-1 shrink-0" />
               <p className="type-cert leading-relaxed">
                 This is an observation record assembled from public data on renaiss.xyz.
-                {l.grading_company ? ` The grade belongs to ${l.grading_company}.` : ''}{' '}
-                RenaissProof did not grade, authenticate, or custody this object. Estimates are
-                labeled as estimates.{' '}
+                {l.grading_company ? ` The grade belongs to ${l.grading_company}.` : ''} RenaissLens
+                did not grade, authenticate, or custody this object. Estimates are labeled as
+                estimates.{' '}
                 <Link href="/standard" className="underline underline-offset-4">
                   Read the standard
                 </Link>{' '}

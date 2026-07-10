@@ -17,7 +17,7 @@ const body = Instrument_Sans({
   variable: '--font-body',
 })
 
-// couture display for the RenaissProof brand — Fraunces: high optical contrast + SOFT/WONK
+// couture display for the RenaissLens brand — Fraunces: high optical contrast + SOFT/WONK
 // (nostalgic-yet-exacting), opsz thickens hairlines so they survive the dark field
 const couture = Fraunces({
   subsets: ['latin'],

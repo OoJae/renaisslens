@@ -6,7 +6,7 @@ import { Wordmark } from '../_components/wordmark'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Proof · RenaissProof' }
+export const metadata: Metadata = { title: 'Proof · RenaissLens' }
 
 function readRichestTokenId(): string | null {
   let db: Database | undefined
