@@ -35,6 +35,8 @@ export const dynamic = 'force-dynamic'
 const WINDOW_MS = 24 * 60 * 60 * 1000
 const ANOMALY_MIN_RATIO = 2.0
 const ANOMALIES_PER_SIDE = 8
+// Index rows are refetched daily; older than this = a stalled collector, drop it.
+const INDEX_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
 function readMarket() {
   let db: Database | undefined
@@ -48,14 +50,19 @@ function readMarket() {
 
     // Renaiss OS Index cross-pricing — join each anomaly to its independent
     // reference price by the shared normalized key (TS join; no cert needed).
-    const indexPrices = allIndexPrices(db)
+    // Drop stale quotes: index rows exist only in live mode (refetched daily),
+    // so a row older than the cutoff means the collector stalled — don't show it.
+    const staleBefore = new Date(Date.now() - INDEX_MAX_AGE_MS).toISOString()
+    const indexPrices = allIndexPrices(db).filter((p) => p.observed_at >= staleBefore)
     const indexByKey = new Map(indexPrices.map((p) => [p.match_key, p]))
     const withIndex = (a: ListingAnomalyRow): AnomalyWithIndex => ({
       ...a,
       index:
-        indexByKey.get(indexMatchKey(a.grading_company, a.grade, a.set_name, a.card_number)) ??
-        null,
+        indexByKey.get(
+          indexMatchKey(a.grading_company, a.grade, a.set_name, a.card_number, a.language),
+        ) ?? null,
     })
+    const anomaliesWithIndex = listingAnomalies(db, ANOMALY_MIN_RATIO, 50).map(withIndex)
     const indicesRaw = getIndexMarket(db, 'indices')
     const tradesRaw = getIndexMarket(db, 'recent_trades')
     const parseArr = <T,>(raw: string | undefined): T[] => {
@@ -81,9 +88,10 @@ function readMarket() {
       latest,
       sales,
       stats: categorySalesStats(sales),
-      anomalies: listingAnomalies(db, ANOMALY_MIN_RATIO, 50).map(withIndex),
+      anomalies: anomaliesWithIndex,
       medianRatio: medianAskToFmvRatio(db),
-      indexCoverage: indexPrices.length,
+      // honest coverage: anomalies that actually resolved an Index line, not the total prices on file
+      indexMatched: anomaliesWithIndex.filter((a) => a.index !== null).length,
       indexObservedAt: indicesRaw?.observed_at ?? tradesRaw?.observed_at ?? null,
       indices: parseArr<IndexEntry>(indicesRaw?.payload_json),
       indexTrades: parseArr<IndexTrade>(tradesRaw?.payload_json),
@@ -144,7 +152,7 @@ export default function Market() {
     stats,
     anomalies,
     medianRatio,
-    indexCoverage,
+    indexMatched,
     indexObservedAt,
     indices,
     indexTrades,
@@ -320,14 +328,15 @@ export default function Market() {
             listing sample covers only the most recently listed cards — a labeled sample, not the
             full marketplace.
           </p>
-          {indexCoverage > 0 && (
+          {indexMatched > 0 && (
             <p>
               The <span className="text-facet">Index</span> line is an{' '}
               <span className="text-zinc-300">independent</span> reference price from the Renaiss OS
               Index — the first number here that isn&apos;t Renaiss&apos;s own valuation. When it
               agrees with FMV, the anomaly is a real ask-vs-market gap; when it diverges, FMV itself
-              may be stale. {indexCoverage} listing{indexCoverage === 1 ? '' : 's'} matched (exact
-              set + number + grade + company); cards we can&apos;t match confidently are left
+              may be stale. {indexMatched} of these flagged listing{indexMatched === 1 ? '' : 's'}{' '}
+              matched exactly (set + number + grade + company + language); cards we can&apos;t match
+              confidently — or where more than one card variant shares that identity — are left
               without an Index line rather than guessed. Reference prices:{' '}
               <a href={INDEX_SITE} className="underline hover:text-zinc-300" rel="noreferrer">
                 Renaiss OS Index

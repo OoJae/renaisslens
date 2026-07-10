@@ -49,6 +49,7 @@ const TRADES = JSON.stringify({
       card: { game: 'one-piece', name: 'Monkey.D.Luffy', cardNumber: '055', href: '/card/...' },
     },
     { id: 'y', priceUsdCents: null, card: null }, // dropped: no price / no card
+    { id: 'z', priceUsdCents: 0, card: { name: 'Zero Priced' } }, // dropped: non-positive price
   ],
 })
 

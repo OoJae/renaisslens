@@ -107,7 +107,9 @@ export function parseRecentTrades(rawText: string): {
   href: string | null
 }[] {
   return TradesResponseSchema.parse(JSON.parse(rawText))
-    .trades.filter((t) => typeof t.priceUsdCents === 'number' && t.card?.name)
+    .trades.filter(
+      (t) => typeof t.priceUsdCents === 'number' && t.priceUsdCents > 0 && t.card?.name,
+    )
     .map((t) => ({
       name: t.card?.name ?? '',
       game: t.card?.game ?? null,

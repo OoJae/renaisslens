@@ -382,6 +382,7 @@ export interface DistinctListingCard {
   card_number: string
   grading_company: string
   grade: string
+  language: string | null
   ask_price_cents: number | null
   fmv_cents: number | null
 }
@@ -390,12 +391,12 @@ export interface DistinctListingCard {
 export function distinctListingCards(db: Database, limit: number): DistinctListingCard[] {
   return db
     .prepare(
-      `SELECT name, pokemon_name, set_name, card_number, grading_company, grade,
+      `SELECT name, pokemon_name, set_name, card_number, grading_company, grade, language,
               MAX(ask_price_cents) AS ask_price_cents, MAX(fmv_cents) AS fmv_cents
        FROM listings
        WHERE grading_company IS NOT NULL AND grade IS NOT NULL
          AND set_name IS NOT NULL AND card_number IS NOT NULL
-       GROUP BY grading_company, grade, set_name, card_number
+       GROUP BY grading_company, grade, set_name, card_number, language
        ORDER BY ask_price_cents DESC
        LIMIT ?`,
     )
@@ -422,10 +423,6 @@ export function upsertIndexPrice(db: Database, p: NewIndexPrice, now: string): v
 /** All Index prices — the web layer builds a Map<match_key, row> to join listings in TS. */
 export function allIndexPrices(db: Database): IndexPriceRow[] {
   return db.prepare(`SELECT * FROM index_prices`).all() as IndexPriceRow[]
-}
-
-export function countIndexPrices(db: Database): number {
-  return (db.prepare(`SELECT COUNT(*) AS n FROM index_prices`).get() as { n: number }).n
 }
 
 /** Store the latest display-only market payload (indices / recent trades) for a kind. */
