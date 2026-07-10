@@ -24,10 +24,14 @@ label-don't-guess). This doc is the contract for finishing it honestly.
 
 ## What YOU must provide to activate
 
-1. `RENAISS_INDEX_API_KEY` (set it as a Railway variable + in `apps/web/.env.local` for local).
+1. ✅ **Credentials — DONE.** `RENAISS_INDEX_API_KEY` (`rk_…`) + `RENAISS_INDEX_API_SECRET`
+   (`rsk_…`) are wired into `apps/web/.env.local` and Railway, read by `indexApiCredentials()`.
+   Still needed:
 2. The **endpoint path(s)** under `api.renaissos.com` we should call (e.g. `/v1/prices?card=…`).
 3. **One real sample response** (raw bytes) or the API docs / an OpenAPI URL.
-4. The **auth scheme** — `Authorization: Bearer <key>` vs `x-api-key: <key>`.
+4. The **auth scheme** — how the key AND secret authenticate a request: `Authorization: Bearer`,
+   `x-api-key` + a signature, HMAC-signed, Basic (`key:secret`), or a token exchange. A key+secret
+   pair usually means one signs and one identifies — confirm which.
 5. Any documented **rate limits** (so the politeness settings can respect them).
 
 ## What gets filled in, in order (mostly one seam)

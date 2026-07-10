@@ -41,3 +41,14 @@ export const CONFIG = {
  * a real parser lands (see docs/index-api-activation.md).
  */
 export const indexApiConfigured = (): boolean => Boolean(process.env.RENAISS_INDEX_API_KEY?.trim())
+
+/**
+ * Index API credentials, read at call time. The auth SCHEME (how key/secret
+ * sign a request — Bearer, x-api-key, HMAC, Basic …) is not yet known, so these
+ * are only surfaced for the activation seam in api/indexPricing.ts; nothing
+ * transmits them until the real endpoint + auth scheme are wired.
+ */
+export const indexApiCredentials = (): { key: string; secret: string } => ({
+  key: process.env.RENAISS_INDEX_API_KEY?.trim() ?? '',
+  secret: process.env.RENAISS_INDEX_API_SECRET?.trim() ?? '',
+})
