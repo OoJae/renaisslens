@@ -1,6 +1,14 @@
 import type { Database } from '@renaisslens/db'
-import { countRows, insertSnapshot, latestEvRuns, openDb, runMigrations } from '@renaisslens/db'
-import { MIN_PULLS_FOR_EV } from '@renaisslens/ev-engine'
+import {
+  countRows,
+  indexMatchKey,
+  insertSnapshot,
+  latestEvRuns,
+  openDb,
+  runMigrations,
+  upsertIndexPrice,
+} from '@renaisslens/db'
+import { HEADLINE_SCENARIO, MIN_PULLS_FOR_EV } from '@renaisslens/ev-engine'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { runEv } from '../src/ev'
 import { loadPacks, loadPulls } from '../src/load'
@@ -155,6 +163,74 @@ describe('runEv', () => {
     expect(report.sources[0]?.status).toBe('ok')
     expect(report.sources[0]?.detail).toContain('skipped')
     db.close()
+  })
+
+  // ── honesty invariants (these live only in prose otherwise) ──────────────
+
+  it('invariant #6: an index_prices row cannot change any published EV range', () => {
+    runEv({ db: ctx.db, iterations: 4000 })
+    const before = latestEvRuns(ctx.db).find((r) => r.scenario === HEADLINE_SCENARIO)
+    // insert an independent Index cross-price for a card — must be inert to EV
+    upsertIndexPrice(
+      ctx.db,
+      {
+        matchKey: indexMatchKey('PSA', '10 Gem Mint', 'Some Set', '001', 'English'),
+        game: 'pokemon',
+        name: 'Whatever',
+        setName: 'Some Set',
+        cardNumber: '001',
+        gradingCompany: 'PSA',
+        grade: '10 Gem Mint',
+        priceCents: 123_456,
+        currency: 'USD',
+        confidence: 'high',
+        deltaPct: 5,
+        lastSaleAt: NOW,
+        href: '/card/x',
+      },
+      NOW,
+    )
+    runEv({ db: ctx.db, iterations: 4000 })
+    const after = latestEvRuns(ctx.db).find((r) => r.scenario === HEADLINE_SCENARIO)
+    expect(after?.p10_cents).toBe(before?.p10_cents)
+    expect(after?.p50_cents).toBe(before?.p50_cents)
+    expect(after?.p90_cents).toBe(before?.p90_cents)
+    ctx.db.close()
+  })
+
+  it('invariant #4: Renaiss’s claimed EV never influences the computed range', () => {
+    const build = (claimedEvCents: number) => {
+      const db = openDb(':memory:')
+      runMigrations(db)
+      const sid = insertSnapshot(db, {
+        source: 'test',
+        cycleId: NOW,
+        url: 'test://fixture',
+        rawPath: 'r',
+        contentSha256: 's',
+        fetchedAt: NOW,
+        status: 'ok',
+      })
+      loadPacks(db, [{ ...OMEGA, expectedValueCents: claimedEvCents }], sid, NOW)
+      const pulls = Array.from({ length: MIN_PULLS_FOR_EV }, (_, i) => ({
+        packSlug: 'omega',
+        collectibleTokenId: `token-${i}`,
+        tier: i < 2 ? 'S' : 'C',
+        fmvCents: i < 2 ? 85_255 : 3000 + i * 100,
+        pulledAt: 1_760_000_000 + i,
+      }))
+      loadPulls(db, pulls, sid, NOW)
+      runEv({ db, iterations: 4000 })
+      const run = latestEvRuns(db).find((r) => r.scenario === HEADLINE_SCENARIO)
+      db.close()
+      return run
+    }
+    // identical pulls/pack; claimed EV differs 5x — the computed range must be identical
+    const low = build(5184)
+    const high = build(5184 * 5)
+    expect(high?.p10_cents).toBe(low?.p10_cents)
+    expect(high?.p50_cents).toBe(low?.p50_cents)
+    expect(high?.p90_cents).toBe(low?.p90_cents)
   })
 
   it('a pack with NULL featured-card FMV still persists all scenarios (top-prize channel off)', () => {

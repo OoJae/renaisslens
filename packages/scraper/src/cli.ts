@@ -12,7 +12,7 @@ program
   .description('one full polite ingestion cycle (live network)')
   .option(
     '--source <source>',
-    'run a single source group: api-packs | api-pack-details | api-marketplace | site-home-activities | api-index (dormant)',
+    'run a single source group: api-packs | api-pack-details | api-marketplace | site-home-activities | api-index',
   )
   .action(async (opts: { source?: string }) => {
     try {

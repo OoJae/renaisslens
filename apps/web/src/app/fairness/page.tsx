@@ -199,8 +199,9 @@ function Observatory({ packs }: { packs: ObservatoryPack[] }) {
                 we actually observed, with a 95% bootstrap CI. Both rest on Renaiss&apos;s own FMV
                 valuations, so this compares Renaiss&apos;s claim against Renaiss&apos;s own
                 realized values —{' '}
-                <span className="text-zinc-300">not an independent price check</span> until the
-                Index API lands. A single rare high-tier pull can swing the observed mean.
+                <span className="text-zinc-300">not an independent price check</span> (for that, the
+                market page cross-references the independent Renaiss OS Index). A single rare
+                high-tier pull can swing the observed mean.
               </p>
             </div>
           </article>

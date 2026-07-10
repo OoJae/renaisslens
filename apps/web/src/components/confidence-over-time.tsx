@@ -225,26 +225,28 @@ export function ConfidenceOverTime({ points, scenario, priceCents }: Props) {
           stroke="#2a1c46"
           strokeWidth="1"
         />
-        {(minP === maxP ? [minP] : [minP, Math.round((minP + maxP) / 2), maxP]).map((n, i, arr) => (
-          <text
-            key={n}
-            x={pullsToX(n, minP, maxP)}
-            y={H - M.bottom + 14}
-            textAnchor={
-              arr.length === 1
-                ? 'middle'
-                : i === 0
-                  ? 'start'
-                  : i === arr.length - 1
-                    ? 'end'
-                    : 'middle'
-            }
-            fill="#71717a"
-            fontSize="10"
-          >
-            {n} pulls
-          </text>
-        ))}
+        {[...new Set(minP === maxP ? [minP] : [minP, Math.round((minP + maxP) / 2), maxP])].map(
+          (n, i, arr) => (
+            <text
+              key={n}
+              x={pullsToX(n, minP, maxP)}
+              y={H - M.bottom + 14}
+              textAnchor={
+                arr.length === 1
+                  ? 'middle'
+                  : i === 0
+                    ? 'start'
+                    : i === arr.length - 1
+                      ? 'end'
+                      : 'middle'
+              }
+              fill="#71717a"
+              fontSize="10"
+            >
+              {n} pulls
+            </text>
+          ),
+        )}
         <text
           x={(M.left + W - M.right) / 2}
           y={H - 4}
