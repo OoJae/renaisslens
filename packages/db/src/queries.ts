@@ -3,8 +3,11 @@ import type {
   DataMode,
   EvRunHistoryRow,
   EvRunRow,
+  IndexMarketRow,
+  IndexPriceRow,
   ListingAnomalyRow,
   NewEvRun,
+  NewIndexPrice,
   NewListing,
   NewPack,
   NewPull,
@@ -368,6 +371,80 @@ export function evRunHistory(db: Database, packSlug: string, scenario: string): 
        ORDER BY ran_at ASC, id ASC`,
     )
     .all(packSlug, scenario) as EvRunHistoryRow[]
+}
+
+// ── renaiss os index (external cross-pricing) ──────────────────────────────────
+
+export interface DistinctListingCard {
+  name: string
+  pokemon_name: string | null
+  set_name: string
+  card_number: string
+  grading_company: string
+  grade: string
+  ask_price_cents: number | null
+  fmv_cents: number | null
+}
+
+/** Distinct graded cards from listings (full identity), richest first — the set to cross-reference. */
+export function distinctListingCards(db: Database, limit: number): DistinctListingCard[] {
+  return db
+    .prepare(
+      `SELECT name, pokemon_name, set_name, card_number, grading_company, grade,
+              MAX(ask_price_cents) AS ask_price_cents, MAX(fmv_cents) AS fmv_cents
+       FROM listings
+       WHERE grading_company IS NOT NULL AND grade IS NOT NULL
+         AND set_name IS NOT NULL AND card_number IS NOT NULL
+       GROUP BY grading_company, grade, set_name, card_number
+       ORDER BY ask_price_cents DESC
+       LIMIT ?`,
+    )
+    .all(limit) as DistinctListingCard[]
+}
+
+/** Upsert one matched Index reference price (latest wins per card identity). */
+export function upsertIndexPrice(db: Database, p: NewIndexPrice, now: string): void {
+  db.prepare(
+    `INSERT INTO index_prices (match_key, game, name, set_name, card_number, grading_company,
+                               grade, price_cents, currency, confidence, delta_pct, last_sale_at,
+                               href, observed_at)
+     VALUES (@matchKey, @game, @name, @setName, @cardNumber, @gradingCompany,
+             @grade, @priceCents, @currency, @confidence, @deltaPct, @lastSaleAt, @href, @now)
+     ON CONFLICT(match_key) DO UPDATE SET
+       game = excluded.game, name = excluded.name, set_name = excluded.set_name,
+       card_number = excluded.card_number, grading_company = excluded.grading_company,
+       grade = excluded.grade, price_cents = excluded.price_cents, currency = excluded.currency,
+       confidence = excluded.confidence, delta_pct = excluded.delta_pct,
+       last_sale_at = excluded.last_sale_at, href = excluded.href, observed_at = excluded.observed_at`,
+  ).run({ ...p, now })
+}
+
+/** All Index prices — the web layer builds a Map<match_key, row> to join listings in TS. */
+export function allIndexPrices(db: Database): IndexPriceRow[] {
+  return db.prepare(`SELECT * FROM index_prices`).all() as IndexPriceRow[]
+}
+
+export function countIndexPrices(db: Database): number {
+  return (db.prepare(`SELECT COUNT(*) AS n FROM index_prices`).get() as { n: number }).n
+}
+
+/** Store the latest display-only market payload (indices / recent trades) for a kind. */
+export function replaceIndexMarket(
+  db: Database,
+  kind: string,
+  payloadJson: string,
+  now: string,
+): void {
+  db.prepare(
+    `INSERT INTO index_market (kind, payload_json, observed_at) VALUES (?, ?, ?)
+     ON CONFLICT(kind) DO UPDATE SET payload_json = excluded.payload_json, observed_at = excluded.observed_at`,
+  ).run(kind, payloadJson, now)
+}
+
+export function getIndexMarket(db: Database, kind: string): IndexMarketRow | undefined {
+  return db.prepare(`SELECT * FROM index_market WHERE kind = ?`).get(kind) as
+    | IndexMarketRow
+    | undefined
 }
 
 // ── source status / freshness ────────────────────────────────────────────────

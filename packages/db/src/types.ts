@@ -179,6 +179,46 @@ export interface ObservatoryPullRow {
   fmv_cents: number
 }
 
+/** A Renaiss OS Index reference price, matched to a card identity. */
+export interface IndexPriceRow {
+  match_key: string
+  game: string | null
+  name: string | null
+  set_name: string | null
+  card_number: string | null
+  grading_company: string | null
+  grade: string | null
+  price_cents: number
+  currency: string
+  confidence: string | null
+  delta_pct: number | null
+  last_sale_at: string | null
+  href: string | null
+  observed_at: string
+}
+
+export interface NewIndexPrice {
+  matchKey: string
+  game: string | null
+  name: string | null
+  setName: string | null
+  cardNumber: string | null
+  gradingCompany: string | null
+  grade: string | null
+  priceCents: number
+  currency: string
+  confidence: string | null
+  deltaPct: number | null
+  lastSaleAt: string | null
+  href: string | null
+}
+
+export interface IndexMarketRow {
+  kind: string
+  payload_json: string
+  observed_at: string
+}
+
 export interface EvRunRow {
   id: number
   pack_slug: string
