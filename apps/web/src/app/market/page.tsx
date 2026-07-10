@@ -1,10 +1,15 @@
 import {
+  allIndexPrices,
   categorizeSaleTitle,
   categorySalesStats,
   type Database,
   getDataMode,
   getFreshness,
+  getIndexMarket,
   getMeta,
+  type IndexPriceRow,
+  indexMatchKey,
+  type ListingAnomalyRow,
   latestSaleAt,
   listingAnomalies,
   medianAskToFmvRatio,
@@ -13,6 +18,17 @@ import {
   salesSince,
 } from '@renaisslens/db'
 import { relativeTime, usd } from '@/lib/format'
+
+const INDEX_SITE = 'https://index.renaissos.com'
+
+type IndexEntry = { game: string; label: string; value: number; d7: number | null }
+type IndexTrade = {
+  name: string
+  gradeLabel: string | null
+  priceUsdCents: number
+  href: string | null
+}
+type AnomalyWithIndex = ListingAnomalyRow & { index: IndexPriceRow | null }
 
 export const dynamic = 'force-dynamic'
 
@@ -29,18 +45,48 @@ function readMarket() {
     // committed demo data is fixed in time and must render identically later
     const sales =
       latest !== null ? salesSince(db, new Date(Date.parse(latest) - WINDOW_MS).toISOString()) : []
+
+    // Renaiss OS Index cross-pricing — join each anomaly to its independent
+    // reference price by the shared normalized key (TS join; no cert needed).
+    const indexPrices = allIndexPrices(db)
+    const indexByKey = new Map(indexPrices.map((p) => [p.match_key, p]))
+    const withIndex = (a: ListingAnomalyRow): AnomalyWithIndex => ({
+      ...a,
+      index:
+        indexByKey.get(indexMatchKey(a.grading_company, a.grade, a.set_name, a.card_number)) ??
+        null,
+    })
+    const indicesRaw = getIndexMarket(db, 'indices')
+    const tradesRaw = getIndexMarket(db, 'recent_trades')
+    const parseArr = <T,>(raw: string | undefined): T[] => {
+      if (raw === undefined) return []
+      try {
+        const v = JSON.parse(raw)
+        return Array.isArray(v) ? (v as T[]) : []
+      } catch {
+        return []
+      }
+    }
+
     return {
       mode: getDataMode(db),
       capturedAt: getMeta(db, 'demo_captured_at'),
       freshness: getFreshness(db).filter(
-        (f) => f.source === 'site-home-activities' || f.source === 'api-marketplace',
+        (f) =>
+          f.source === 'site-home-activities' ||
+          f.source === 'api-marketplace' ||
+          f.source === 'api-index',
       ),
       batch: salesBatchInfo(db),
       latest,
       sales,
       stats: categorySalesStats(sales),
-      anomalies: listingAnomalies(db, ANOMALY_MIN_RATIO, 50),
+      anomalies: listingAnomalies(db, ANOMALY_MIN_RATIO, 50).map(withIndex),
       medianRatio: medianAskToFmvRatio(db),
+      indexCoverage: indexPrices.length,
+      indexObservedAt: indicesRaw?.observed_at ?? tradesRaw?.observed_at ?? null,
+      indices: parseArr<IndexEntry>(indicesRaw?.payload_json),
+      indexTrades: parseArr<IndexTrade>(tradesRaw?.payload_json),
     }
   } catch {
     return null
@@ -54,6 +100,30 @@ const ratioBadge = (ratio: number): string =>
     ? `${ratio >= 10 ? Math.round(ratio) : ratio.toFixed(1)}× FMV`
     : `${ratio.toFixed(2)}× FMV`
 
+/** Independent Renaiss OS Index price vs Renaiss's own FMV — agree/diverge signal. */
+function IndexCrossRef({
+  indexCents,
+  fmvCents,
+  confidence,
+}: {
+  indexCents: number
+  fmvCents: number
+  confidence: string | null
+}) {
+  const deltaPct = Math.round((indexCents / fmvCents - 1) * 100)
+  const agrees = Math.abs(deltaPct) <= 15
+  return (
+    <p className="mt-0.5 text-xs tabular-nums">
+      <span className="text-facet">Index {usd(indexCents)}</span>{' '}
+      <span className={agrees ? 'text-emerald-400' : 'text-amber-300'}>
+        ({deltaPct >= 0 ? '+' : ''}
+        {deltaPct}% vs FMV{agrees ? ' — agrees' : ''})
+      </span>
+      {confidence ? <span className="text-zinc-600"> · {confidence} conf.</span> : null}
+    </p>
+  )
+}
+
 export default function Market() {
   const data = readMarket()
   if (data === null) {
@@ -64,7 +134,21 @@ export default function Market() {
       </p>
     )
   }
-  const { mode, capturedAt, freshness, batch, latest, sales, stats, anomalies, medianRatio } = data
+  const {
+    mode,
+    capturedAt,
+    freshness,
+    batch,
+    latest,
+    sales,
+    stats,
+    anomalies,
+    medianRatio,
+    indexCoverage,
+    indexObservedAt,
+    indices,
+    indexTrades,
+  } = data
   const above = anomalies.filter((a) => a.direction === 'above-fmv')
   const below = anomalies.filter((a) => a.direction === 'below-fmv')
   const windowStart = latest
@@ -210,6 +294,13 @@ export default function Market() {
                         {a.set_name ? ` · ${a.set_name}` : ''} · ask {usd(a.ask_price_cents)} vs FMV{' '}
                         {usd(a.fmv_cents)}
                       </p>
+                      {a.index !== null && a.fmv_cents !== null && (
+                        <IndexCrossRef
+                          indexCents={a.index.price_cents}
+                          fmvCents={a.fmv_cents}
+                          confidence={a.index.confidence}
+                        />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -229,28 +320,98 @@ export default function Market() {
             listing sample covers only the most recently listed cards — a labeled sample, not the
             full marketplace.
           </p>
+          {indexCoverage > 0 && (
+            <p>
+              The <span className="text-facet">Index</span> line is an{' '}
+              <span className="text-zinc-300">independent</span> reference price from the Renaiss OS
+              Index — the first number here that isn&apos;t Renaiss&apos;s own valuation. When it
+              agrees with FMV, the anomaly is a real ask-vs-market gap; when it diverges, FMV itself
+              may be stale. {indexCoverage} listing{indexCoverage === 1 ? '' : 's'} matched (exact
+              set + number + grade + company); cards we can&apos;t match confidently are left
+              without an Index line rather than guessed. Reference prices:{' '}
+              <a href={INDEX_SITE} className="underline hover:text-zinc-300" rel="noreferrer">
+                Renaiss OS Index
+              </a>
+              .
+            </p>
+          )}
         </div>
       </section>
 
-      <section className="max-w-2xl">
-        <div className="overflow-hidden rounded-sm border border-zinc-700/60 bg-zinc-900/60">
-          <div className="h-1 bg-vault-700" />
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-1.5">
-            <span className="font-display text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
-              RenaissLens · Index Cross-Pricing
-            </span>
-            <span className="rounded border border-zinc-700 px-1.5 py-0.5 font-display text-[10px] uppercase tracking-[0.14em] text-zinc-500">
-              Planned
-            </span>
+      {indices.length > 0 && (
+        <section>
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h2 className="font-display text-lg font-medium text-zinc-100">Renaiss OS Index</h2>
+            <a
+              href={INDEX_SITE}
+              rel="noreferrer"
+              className="font-display text-[11px] uppercase tracking-[0.14em] text-facet hover:text-zinc-200"
+            >
+              Data: Renaiss OS Index ↗
+            </a>
           </div>
-          <div className="px-4 pb-3 pt-2 text-xs leading-relaxed text-zinc-400">
-            Every FMV figure above is Renaiss&apos;s own valuation. Independent cross-referencing
-            against the Renaiss Index API (<code>api.renaissos.com</code>) is planned and not yet
-            integrated — it needs a key and a documented response schema. Until it lands, we label
-            FMV honestly rather than guess a second price.
-          </div>
-        </div>
-      </section>
+          <p className="mb-3 text-sm text-zinc-400">
+            An independent, cross-marketplace price index — separate from Renaiss&apos;s own FMV. We
+            surface it for context and to cross-check the FMV figures above.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {indices.map((idx) => (
+              <li key={idx.game} className="rounded border border-vault-700 bg-vault-900/60 p-3">
+                <p className="font-display text-[11px] uppercase tracking-[0.14em] text-prism">
+                  {idx.label}
+                </p>
+                <p className="mt-1 flex items-baseline gap-2">
+                  <span className="font-display text-xl font-semibold tabular-nums text-zinc-100">
+                    {idx.value.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </span>
+                  {idx.d7 !== null && (
+                    <span
+                      className={`text-xs tabular-nums ${idx.d7 >= 0 ? 'text-emerald-400' : 'text-amber-300'}`}
+                    >
+                      {idx.d7 >= 0 ? '+' : ''}
+                      {idx.d7.toFixed(2)}% 7d
+                    </span>
+                  )}
+                </p>
+              </li>
+            ))}
+          </ul>
+          {indexTrades.length > 0 && (
+            <>
+              <h3 className="mt-4 mb-2 font-display text-sm font-medium text-zinc-200">
+                Recent independent trades
+              </h3>
+              <ul className="space-y-1 text-sm">
+                {indexTrades.slice(0, 6).map((t) => (
+                  <li
+                    key={`${t.href ?? t.name}-${t.priceUsdCents}`}
+                    className="flex flex-wrap items-baseline justify-between gap-x-3 border-b border-vault-800 py-1.5"
+                  >
+                    <span className="min-w-0 text-zinc-300">
+                      {t.name}
+                      {t.gradeLabel ? (
+                        <span className="ml-2 text-xs text-zinc-500">{t.gradeLabel}</span>
+                      ) : null}
+                    </span>
+                    <span className="font-display font-semibold tabular-nums text-zinc-100">
+                      {usd(t.priceUsdCents)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p className="mt-2 text-xs text-zinc-500">
+            All figures are the Renaiss OS Index&apos;s own valuations
+            {indexObservedAt ? ` (fetched ${indexObservedAt.slice(0, 10)})` : ''}. Attribution
+            required:{' '}
+            <a href={INDEX_SITE} className="underline hover:text-zinc-300" rel="noreferrer">
+              Renaiss OS Index
+            </a>
+            .
+          </p>
+        </section>
+      )}
 
       <section className="text-xs text-zinc-500">
         <h2 className="mb-2 font-display text-sm font-medium text-zinc-300">Data freshness</h2>
