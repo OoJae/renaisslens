@@ -1,62 +1,42 @@
-# Activating Renaiss Index API cross-pricing
+# Renaiss OS Index cross-pricing — ACTIVATED
 
-The scaffolding is in place; the live integration is deliberately **not**, because
-building a parser against a response we've never seen would violate the same
-anti-fabrication rule the rest of RenaissLens follows (snapshot-and-quarantine,
-label-don't-guess). This doc is the contract for finishing it honestly.
+**Status: live.** The dormant scaffolding described earlier has been filled in against
+real `api.renaissos.com` responses. This doc is now the maintenance reference.
 
-## What already exists (dormant, shipped)
+## What runs
 
-- `RENAISS_INDEX_API_URL` (default `https://api.renaissos.com`) + `RENAISS_INDEX_API_KEY`
-  in [`packages/scraper/src/config.ts`](../packages/scraper/src/config.ts), with a
-  call-time gate `indexApiConfigured()` mirroring the AI explainer's key gate.
-- A generic auth-header capability on `politeGet` (`opts.headers`) — the identified
-  User-Agent can never be stripped. Covered by `packages/scraper/test/politeClient.test.ts`.
-- A registered-but-dormant source `api-index` in
-  [`packages/scraper/src/api/indexPricing.ts`](../packages/scraper/src/api/indexPricing.ts):
-  it **benign-skips before any network call**, so a key set early neither fetches nor
-  fabricates. `runCycle` excludes it from the "claim live mode" check, so the skip can't
-  flip `data_mode`.
-- A provisional `IndexCrossRef` output interface (OUR normalized target — not a guess of
-  Renaiss's wire fields).
-- A "planned / not configured" card on `/market` and the "planned" labels in
-  `README.md` / `METHODOLOGY.md`.
+- **Auth**: `X-Api-Key` + `X-Api-Secret` headers (partner key), read by `indexApiCredentials()`
+  in [`config.ts`](../packages/scraper/src/config.ts), sent via `politeGet`'s `headers` option
+  (identified UA preserved). Credentials live in `apps/web/.env.local` (gitignored) + Railway.
+- **Collector** (`api-index`, daily): [`api/indexPricing.ts`](../packages/scraper/src/api/indexPricing.ts)
+  fetches `/v1/indices` + `/v1/trades/recent` (display-only panel) and, for the richest ~40
+  distinct graded listings, calls `/v1/search` and **exact-matches** each result on
+  `company|grade|set|number` ([`matchCard.ts`](../packages/scraper/src/matchCard.ts) +
+  [`indexMatchKey`](../packages/db/src/matchKey.ts)). Only exact matches are stored; the rest are
+  skipped, never guessed. Self-skips (no network) when unkeyed.
+- **Schemas** ([`parsers/indexSchemas.ts`](../packages/scraper/src/parsers/indexSchemas.ts)) were
+  authored from real captured responses; `.passthrough()` tolerates additive drift, required
+  fields fail hard.
+- **Storage**: `index_prices` (keyed by the normalized match key) + `index_market` (panel), migration
+  [`0003_index.sql`](../packages/db/migrations/0003_index.sql). Not FK'd to a snapshot — provenance
+  is `observed_at` + each row's `href` (the Index source page, which is also the required attribution).
+- **UI**: `/market` shows the independent **Renaiss OS Index** panel and an **Index** cross-reference
+  line inside the anomaly radar (Index price + % vs FMV + confidence), attributed to Renaiss OS Index.
+- **EV is untouched**: the Index is displayed for contrast only, never blended into the EV model
+  (METHODOLOGY.md limitation #4 — label, don't overwrite).
 
-## What YOU must provide to activate
+## Facts about the API (for reference)
 
-1. ✅ **Credentials — DONE.** `RENAISS_INDEX_API_KEY` (`rk_…`) + `RENAISS_INDEX_API_SECRET`
-   (`rsk_…`) are wired into `apps/web/.env.local` and Railway, read by `indexApiCredentials()`.
-   Still needed:
-2. The **endpoint path(s)** under `api.renaissos.com` we should call (e.g. `/v1/prices?card=…`).
-3. **One real sample response** (raw bytes) or the API docs / an OpenAPI URL.
-4. The **auth scheme** — how the key AND secret authenticate a request: `Authorization: Bearer`,
-   `x-api-key` + a signature, HMAC-signed, Basic (`key:secret`), or a token exchange. A key+secret
-   pair usually means one signs and one identifies — confirm which.
-5. Any documented **rate limits** (so the politeness settings can respect them).
+- Base `https://api.renaissos.com`; OpenAPI at `/v1/openapi.json`.
+- Our marketplace listings carry **no cert numbers**, so `/v1/graded/{cert}` isn't used for them;
+  structural `/v1/search` + exact-match is the path. `/v1/graded/{cert}` remains available for any
+  future cert-bearing data.
+- The docs page's `/v1/index/item-by-no` / `/v1/index/by-cert` are **not** on the host (they 404 to
+  the site HTML); the OpenAPI spec is authoritative.
+- Partner quota 10k/day; per-IP public tier 10/day. Attribution ("Renaiss OS Index" + link) required.
 
-## What gets filled in, in order (mostly one seam)
+## Extending later
 
-1. **Fetch + parse seam** — in `api/indexPricing.ts`, replace the keyed benign-skip with
-   `politeGet(url, { source: INDEX_SOURCE, headers: { Authorization: … } })` + a
-   `parseIndexResponse()` built **from the real sample**.
-2. **Schema from real bytes** — add a Zod schema to `parsers/schemas.ts` + a normalizer to
-   `parsers/normalize.ts`. Prefer generating the raw type
-   (`openapi-typescript https://api.renaissos.com/openapi.json -o src/api/indexTypes.gen.ts`,
-   mirroring the existing `codegen` script) so it's generated, not hand-guessed.
-3. **Persistence** — a DB migration + loader for the reference prices, keyed by card identity
-   (token id / set / card number / grade — already normalized elsewhere).
-4. **Cadence** — add `'api-index'` to `CONFIG.cadences` (e.g. daily). Only now does `watch`
-   poll it; the fetch seam must exist first.
-5. **EV integration** — introduce the cross-reference as a NEW `inferred` assumption
-   `index_cross_ref_ratio` in `scenarios.ts`, carried for contrast. Do **not** silently blend it
-   into `fmvHaircut`; `simulate.ts`/`mixture.ts` stay untouched until a deliberate, separately
-   reviewed change (METHODOLOGY.md limitation #4: label, don't overwrite).
-
-## Do NOT do before you have the real response
-
-- No Zod schema / normalizer / DB columns against a guessed payload.
-- No `RawIndexResponse` hand-written — generate it.
-- No EV blending of an imagined price.
-
-Only when a real, validated number renders should the three "planned — not yet integrated"
-labels (`README.md`, `METHODOLOGY.md`, this repo's market card) flip to "integrated."
+- Match pack **pull** cards (not just listings) to the Index.
+- A separately-reviewed option to let a high-confidence Index price inform the EV `fmvHaircut`
+  (kept labeled as `inferred`, never silently blended).

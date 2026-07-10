@@ -86,7 +86,7 @@ want the AI explainer.
 |---|---|---|---|---|
 | `api.renaiss.xyz` (public, no auth) | Packs, pack pull feed, marketplace listings | REST poll | 30 min / 6 h | ≥2s between requests, identified UA, backoff |
 | `www.renaiss.xyz` homepage | "Latest Activities" sales feed | Server-rendered HTML fetch (Playwright fallback) | 30 min | Single page per cycle, identified UA |
-| Renaiss Index API (`api.renaissos.com`) | External reference prices | _planned — not yet integrated_ | — | keyed, rate-limited |
+| Renaiss OS Index API (`api.renaissos.com`) | Independent cross-marketplace reference prices (cross-checked vs FMV) | Keyed REST (`X-Api-Key`/`X-Api-Secret`), exact-match by card identity | Daily | Partner key, 10k/day, ≥2s spacing, attributed |
 
 Every stored record traces back to a raw snapshot on disk with a timestamp; every displayed metric carries its source and scrape time. See [METHODOLOGY.md](METHODOLOGY.md).
 

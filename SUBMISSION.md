@@ -65,9 +65,10 @@ See [METHODOLOGY.md](METHODOLOGY.md) — the Limitations section is deliberately
 - **M3 — Dashboard + market intel**: pack detail pages (animated histogram, sensitivity table, assumptions panel), market page (sales pulse, categorized feed, two-sided listing-anomaly radar), and the graded-slab design system (reduced-motion + mobile + keyboard-focus support throughout).
 - **M4 — AI explainer + methodology**: guardrailed explain endpoint (provider-agnostic Anthropic protocol; server-enforced caveat; data-state-keyed cache; rate limiting), in-app Methodology page, fairness roadmap tab.
 - **M5 — Ship**: Railway deploy (Docker multi-stage, volume-seeded demo data, health-gated boot, watch-loop supervisor with hourly snapshot pruning), public GitHub repo, uptime canary, submission assets.
+- **M6 — The roadmap, shipped honestly**: (1) the Fairness tab became a live **observed-outcomes observatory** (per-tier empirical pull frequencies with Wilson confidence intervals + a claimed-EV-vs-observed reconciliation) above the still-disabled cryptographic-verification roadmap; (2) a **confidence-over-time** chart on each pack page (the EV range narrowing as pulls accumulate); (3) **Renaiss OS Index cross-pricing** integrated — an independent reference price cross-checked against Renaiss's own FMV on the market page, exact-matched by card identity and attributed.
 
 ## What's next
 
-- **Fairness verification**: the moment Renaiss open-sources their provably-fair pipeline, the Fairness tab verifies commitments against observed pulls (the data collection for it already runs).
-- **Renaiss Index API cross-pricing**: replace single-marketplace FMV with cross-referenced index prices.
-- **Confidence tracking over time**: chart how each pack's EV range narrows as the public pull feed grows.
+- **Fairness verification**: the moment Renaiss open-sources their provably-fair commitment scheme, the disabled section of the Fairness tab verifies pulls cryptographically (the observed-outcome data collection already runs).
+- **Index-informed FMV in EV**: the market page cross-references the Index against FMV today; a natural next step is a *separately-reviewed* option to let a confident Index price inform the EV model's FMV haircut (kept labeled, never silently blended).
+- **Broader Index coverage**: match pack pull cards (not just marketplace listings) to the Index, and use graded-cert lookups where certs become available.
