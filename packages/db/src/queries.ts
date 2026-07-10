@@ -6,6 +6,8 @@ import type {
   IndexMarketRow,
   IndexPriceRow,
   ListingAnomalyRow,
+  ListingHistoryRow,
+  ListingRow,
   NewEvRun,
   NewIndexPrice,
   NewListing,
@@ -17,6 +19,7 @@ import type {
   PackRow,
   PullRow,
   SaleRow,
+  SnapshotRow,
   SourceFreshness,
   TierBucket,
 } from './types'
@@ -36,6 +39,11 @@ export function insertSnapshot(db: Database, s: NewSnapshot): number {
       ...s,
     })
   return Number(res.lastInsertRowid)
+}
+
+/** One snapshot row by id — the provenance anchor a proof page renders (source, url, sha256). */
+export function getSnapshotById(db: Database, id: number): SnapshotRow | undefined {
+  return db.prepare(`SELECT * FROM snapshots WHERE id = ?`).get(id) as SnapshotRow | undefined
 }
 
 // ── packs ────────────────────────────────────────────────────────────────────
@@ -218,6 +226,42 @@ export function upsertListing(db: Database, l: NewListing, snapshotId: number, n
   }
 }
 
+export function getListingByTokenId(db: Database, tokenId: string): ListingRow | undefined {
+  return db.prepare(`SELECT * FROM listings WHERE token_id = ?`).get(tokenId) as
+    | ListingRow
+    | undefined
+}
+
+/**
+ * Graded listings (company AND grade both present — ungraded rows are not
+ * provable objects), ordered richest-record first: how many identity/price
+ * fields are populated, then value, then recency. Deterministic tiebreak on
+ * token_id so the /proof redirect target and the vault wall are stable per
+ * data state.
+ */
+export function listGradedListings(db: Database, limit = 500): ListingRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM listings
+       WHERE grading_company IS NOT NULL AND grade IS NOT NULL
+       ORDER BY ((set_name IS NOT NULL) + (card_number IS NOT NULL) + (fmv_cents IS NOT NULL)
+               + (ask_price_cents IS NOT NULL) + (vault_location IS NOT NULL)
+               + (owner_username IS NOT NULL) + (year IS NOT NULL) + (language IS NOT NULL)) DESC,
+         COALESCE(fmv_cents, ask_price_cents, 0) DESC,
+         observed_at DESC,
+         token_id ASC
+       LIMIT ?`,
+    )
+    .all(limit) as ListingRow[]
+}
+
+/** Full price timeline for one listing, oldest→newest (rows appended only on ask/FMV change). */
+export function listingHistory(db: Database, tokenId: string): ListingHistoryRow[] {
+  return db
+    .prepare(`SELECT * FROM listing_history WHERE token_id = ? ORDER BY observed_at ASC, id ASC`)
+    .all(tokenId) as ListingHistoryRow[]
+}
+
 /**
  * Listings whose ask diverges from Renaiss's FMV in EITHER direction, ranked
  * by symmetric divergence max(ratio, 1/ratio). Surfaced as "listing anomaly"
@@ -290,6 +334,16 @@ export function recentSales(db: Database, limit: number): SaleRow[] {
   return db
     .prepare(`SELECT * FROM sales ORDER BY COALESCE(sold_at, observed_at) DESC LIMIT ?`)
     .all(limit) as SaleRow[]
+}
+
+/** Observed sale events for one token, newest first. Rows with a NULL token_id never match. */
+export function salesForToken(db: Database, tokenId: string): SaleRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM sales WHERE token_id = ?
+       ORDER BY COALESCE(sold_at, observed_at) DESC, id DESC`,
+    )
+    .all(tokenId) as SaleRow[]
 }
 
 /** Newest sale timestamp — the anchor for feed-relative windows (never wall-clock: demo data is fixed in time). */

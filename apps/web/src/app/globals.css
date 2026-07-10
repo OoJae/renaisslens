@@ -178,4 +178,45 @@ body {
   .methodology td {
     @apply border border-vault-800 px-3 py-2 align-top;
   }
+
+  /* /standard — marked-rendered section bodies on the ink field (headings are
+     rendered by the page itself, so no h1/h2 rules here) */
+  .standard-prose {
+    @apply max-w-prose leading-relaxed text-bone-50/80;
+    font-size: var(--step-body);
+  }
+  .standard-prose p {
+    @apply mb-4;
+  }
+  .standard-prose em {
+    @apply italic text-fog;
+  }
+  .standard-prose strong {
+    @apply font-semibold text-bone-50;
+  }
+  .standard-prose code {
+    @apply rounded bg-vault-800 px-1 py-0.5 font-mono text-[0.85em] text-prism;
+  }
+  .standard-prose ul,
+  .standard-prose ol {
+    @apply mb-4 space-y-2 pl-5;
+  }
+  .standard-prose ul {
+    @apply list-disc;
+  }
+  .standard-prose ol {
+    @apply list-decimal;
+  }
+  .standard-prose a {
+    @apply text-bone-50 underline decoration-vault-700 underline-offset-4 transition-colors hover:decoration-prism;
+  }
+  .standard-prose table {
+    @apply mb-4 block w-full overflow-x-auto text-sm;
+  }
+  .standard-prose th {
+    @apply border border-vault-700 bg-vault-900 px-3 py-2 text-left font-display font-medium text-fog;
+  }
+  .standard-prose td {
+    @apply border border-vault-800 px-3 py-2 align-top;
+  }
 }

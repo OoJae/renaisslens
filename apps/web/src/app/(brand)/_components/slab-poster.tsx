@@ -4,6 +4,13 @@ interface SlabPosterProps {
   className?: string
   /** 'raw' = ungraded (blurred/matte, no gold); 'proven' = graded+sealed+authenticated. */
   state?: 'raw' | 'proven'
+  /** Real cert data — all optional; defaults reproduce the brand-poster exactly. */
+  company?: string
+  grade?: string
+  /** Pre-truncate long ids before passing (cqw-sized line) — e.g. `CERT · 123456…7890`. */
+  serial?: string
+  /** Object name — enriches the aria-label only. */
+  title?: string
 }
 
 /**
@@ -13,16 +20,29 @@ interface SlabPosterProps {
  * `[container-type:inline-size]` + cqw units keep every detail in proportion at
  * any size. Card art is an abstract guilloché — never real IP.
  */
-export function SlabPoster({ className, state = 'proven' }: SlabPosterProps) {
+export function SlabPoster({
+  className,
+  state = 'proven',
+  company,
+  grade,
+  serial,
+  title,
+}: SlabPosterProps) {
   const proven = state === 'proven'
+  const companyText = company ?? 'RenaissProof'
+  const gradeText = grade ?? (proven ? 'Gem Mint 10' : 'Ungraded')
+  const serialText = serial ?? (proven ? 'CERT · 0000000001' : '— — — — — —')
+  const defaultLabel = proven
+    ? 'A RenaissProof slab: a holographic card graded Gem Mint 10, sealed in an acrylic case with a cert label and gold seal.'
+    : 'An ungraded card, not yet sealed or proven.'
   return (
     <div
       className={`relative aspect-[0.66/1] w-full max-w-[min(80vw,25rem)] [container-type:inline-size] ${className ?? ''}`}
       role="img"
       aria-label={
-        proven
-          ? 'A RenaissProof slab: a holographic card graded Gem Mint 10, sealed in an acrylic case with a cert label and gold seal.'
-          : 'An ungraded card, not yet sealed or proven.'
+        title
+          ? `${title} — graded ${gradeText} by ${companyText}, sealed in an acrylic case with a cert label.`
+          : defaultLabel
       }
     >
       {/* museum spotlight — the one velvet glow */}
@@ -78,22 +98,22 @@ export function SlabPoster({ className, state = 'proven' }: SlabPosterProps) {
           <div className="flex items-start justify-between">
             <div className="min-w-0">
               <p
-                className="text-[3cqw] font-bold uppercase leading-none tracking-[0.16em]"
+                className="break-words text-[3cqw] font-bold uppercase leading-none tracking-[0.16em]"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
-                RenaissProof
+                {companyText}
               </p>
               <p
-                className="mt-[2.5cqw] text-[6.4cqw] font-bold uppercase leading-none"
+                className="mt-[2.5cqw] break-words text-[6.4cqw] font-bold uppercase leading-none"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                {proven ? 'Gem Mint 10' : 'Ungraded'}
+                {gradeText}
               </p>
               <p
-                className="mt-[2cqw] text-[3cqw] leading-none text-plaque/70"
+                className="mt-[2cqw] break-all text-[3cqw] leading-none text-plaque/70"
                 style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
               >
-                {proven ? 'CERT · 0000000001' : '— — — — — —'}
+                {serialText}
               </p>
             </div>
             <ProofSeal size={44} ignited={proven} className="w-[22cqw] shrink-0" />

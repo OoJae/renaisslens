@@ -1,5 +1,4 @@
 import {
-  allIndexPrices,
   categorizeSaleTitle,
   categorySalesStats,
   type Database,
@@ -18,6 +17,7 @@ import {
   salesSince,
 } from '@renaisslens/db'
 import { relativeTime, usd } from '@/lib/format'
+import { freshIndexByKey } from '@/lib/index-prices'
 
 const INDEX_SITE = 'https://index.renaissos.com'
 
@@ -35,8 +35,6 @@ export const dynamic = 'force-dynamic'
 const WINDOW_MS = 24 * 60 * 60 * 1000
 const ANOMALY_MIN_RATIO = 2.0
 const ANOMALIES_PER_SIDE = 8
-// Index rows are refetched daily; older than this = a stalled collector, drop it.
-const INDEX_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
 function readMarket() {
   let db: Database | undefined
@@ -50,11 +48,8 @@ function readMarket() {
 
     // Renaiss OS Index cross-pricing — join each anomaly to its independent
     // reference price by the shared normalized key (TS join; no cert needed).
-    // Drop stale quotes: index rows exist only in live mode (refetched daily),
-    // so a row older than the cutoff means the collector stalled — don't show it.
-    const staleBefore = new Date(Date.now() - INDEX_MAX_AGE_MS).toISOString()
-    const indexPrices = allIndexPrices(db).filter((p) => p.observed_at >= staleBefore)
-    const indexByKey = new Map(indexPrices.map((p) => [p.match_key, p]))
+    // Staleness handling lives in freshIndexByKey (shared with the brand pages).
+    const indexByKey = freshIndexByKey(db)
     const withIndex = (a: ListingAnomalyRow): AnomalyWithIndex => ({
       ...a,
       index:

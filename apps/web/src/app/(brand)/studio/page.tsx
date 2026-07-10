@@ -38,14 +38,14 @@ const SECTIONS: Section[] = [
     label: 'The Proof',
     title: 'Proof you can check yourself.',
     body: 'Every object carries a cert number and a hash tied to its record. You do not take our word for it — you verify it.',
-    cta: { href: '/methodology', text: 'Read the standard' },
+    cta: { href: '/standard', text: 'Read the standard' },
   },
   {
     num: '04',
     label: 'The Vault',
-    title: 'Your collection, on the record.',
-    body: 'The vault holds every object you own with its full provenance — grade, seal, cert, and every hand it has passed through.',
-    cta: { href: '/', text: 'Enter the vault' },
+    title: 'The collection, on the record.',
+    body: 'The vault holds every graded object under observation with its full provenance — grade, seal, cert, and its price record.',
+    cta: { href: '/vault', text: 'Enter the vault' },
   },
   {
     num: '05',
@@ -116,7 +116,7 @@ export default function Studio() {
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
-              href="/"
+              href="/vault"
               className="group inline-flex items-center gap-2 rounded-full bg-slab px-5 py-3 font-display text-sm font-medium text-plaque transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
             >
               Enter the vault
@@ -126,7 +126,7 @@ export default function Studio() {
               />
             </Link>
             <Link
-              href="/packs/omega"
+              href="/proof"
               className="type-cert inline-flex items-center gap-2 rounded-full border border-vault-700 px-5 py-3 text-bone-50 transition-colors hover:border-prism/50"
             >
               See a live proof
@@ -186,7 +186,7 @@ export default function Studio() {
             <p className="type-cert max-w-2xl leading-relaxed text-fog">
               Every claim here is checkable. Grades are independent, seals are tamper-evident,
               proofs are public. Estimates are labeled as estimates.{' '}
-              <Link href="/methodology" className="text-bone-50 underline-offset-4 hover:underline">
+              <Link href="/standard" className="text-bone-50 underline-offset-4 hover:underline">
                 Read the standard
               </Link>
               . Not affiliated with Renaiss.

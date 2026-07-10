@@ -116,6 +116,16 @@ export interface NewListing {
   attributesJson: string | null
 }
 
+/** One appended price observation for a listing (written only when ask or FMV changed). */
+export interface ListingHistoryRow {
+  id: number
+  token_id: string
+  ask_price_cents: number | null
+  fmv_cents: number | null
+  observed_at: string
+  snapshot_id: number
+}
+
 export type AnomalyDirection = 'above-fmv' | 'below-fmv'
 
 export interface ListingAnomalyRow extends ListingRow {
