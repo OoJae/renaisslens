@@ -42,7 +42,7 @@ export function PackCard({ pack, verdict, reason, headline }: PackCardProps) {
   return (
     <Link
       href={`/packs/${pack.slug}`}
-      className="block rounded-lg border border-vault-700 bg-vault-900 transition-colors hover:border-prism/50 motion-reduce:transition-none"
+      className="block min-w-0 rounded-lg border border-vault-700 bg-vault-900 transition-colors hover:border-prism/50 motion-reduce:transition-none"
     >
       <article>
         <SlabBadge verdict={verdict} reason={reason} size="card" />
@@ -67,8 +67,8 @@ export function PackCard({ pack, verdict, reason, headline }: PackCardProps) {
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-zinc-400">Our EV (P10–P50–P90)†</dt>
-              <dd className="text-right font-display tabular-nums text-zinc-100">
+              <dt className="shrink-0 text-zinc-400">Our EV (P10–P50–P90)†</dt>
+              <dd className="min-w-0 text-right font-display tabular-nums text-zinc-100">
                 {headline ? (
                   <>
                     {usd(headline.p10_cents)} –{' '}

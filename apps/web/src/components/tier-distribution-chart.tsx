@@ -166,30 +166,37 @@ export function TierDistributionChart({ packName, tiers }: Props) {
         })}
       </svg>
 
-      {/* screen-reader companion: the numbers, not just the picture */}
-      <table className="sr-only">
-        <caption>Observed pull frequency by tier for {packName}, with 95% Wilson intervals</caption>
-        <thead>
-          <tr>
-            <th scope="col">Tier</th>
-            <th scope="col">n</th>
-            <th scope="col">Observed share</th>
-            <th scope="col">95% CI</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tiers.map((t) => (
-            <tr key={t.tier}>
-              <td>{t.tier}</td>
-              <td>{t.n}</td>
-              <td>{pct(t.point)}</td>
-              <td>
-                {pct(t.lo)}–{pct(t.hi)}
-              </td>
+      {/* screen-reader companion: the numbers, not just the picture. The
+          sr-only wraps a DIV, not the table — a bare sr-only <table> keeps
+          auto-layout and expands past the viewport (its width:1px is ignored),
+          creating horizontal scroll on mobile; the div's overflow:hidden clips it. */}
+      <div className="sr-only">
+        <table>
+          <caption>
+            Observed pull frequency by tier for {packName}, with 95% Wilson intervals
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Tier</th>
+              <th scope="col">n</th>
+              <th scope="col">Observed share</th>
+              <th scope="col">95% CI</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tiers.map((t) => (
+              <tr key={t.tier}>
+                <td>{t.tier}</td>
+                <td>{t.n}</td>
+                <td>{pct(t.point)}</td>
+                <td>
+                  {pct(t.lo)}–{pct(t.hi)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

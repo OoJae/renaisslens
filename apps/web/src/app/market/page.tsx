@@ -276,7 +276,7 @@ export default function Market() {
               { title: 'Ask below FMV', rows: below },
             ] as const
           ).map(({ title, rows }) => (
-            <div key={title} className="rounded border border-vault-700">
+            <div key={title} className="min-w-0 rounded border border-vault-700">
               <div className="flex items-baseline justify-between border-b border-vault-800 bg-vault-900 px-3 py-2">
                 <h3 className="font-display text-sm font-medium text-zinc-200">{title}</h3>
                 <span className="text-xs text-zinc-500">

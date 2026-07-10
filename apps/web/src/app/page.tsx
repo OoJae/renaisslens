@@ -97,7 +97,7 @@ export default function Home() {
           {packs.map((p) => {
             const { verdict, reason, headline } = packEv(evByPack.get(p.slug), p.price_cents)
             return (
-              <li key={p.slug}>
+              <li key={p.slug} className="min-w-0">
                 <PackCard pack={p} verdict={verdict} reason={reason} headline={headline} />
               </li>
             )

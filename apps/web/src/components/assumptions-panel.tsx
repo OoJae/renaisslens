@@ -38,8 +38,10 @@ export function AssumptionsPanel({ assumptions }: { assumptions: Assumption[] })
               {group.map((a) => (
                 <li key={a.name} className="grid gap-1 px-3 py-2 sm:grid-cols-[1fr_auto]">
                   <div className="min-w-0">
-                    <p className="font-mono text-xs text-zinc-300">{a.name}</p>
-                    <p className="mt-0.5 text-xs leading-snug text-zinc-500">{a.source}</p>
+                    <p className="break-words font-mono text-xs text-zinc-300">{a.name}</p>
+                    <p className="mt-0.5 break-words text-xs leading-snug text-zinc-500">
+                      {a.source}
+                    </p>
                   </div>
                   <p className="break-all font-display text-sm tabular-nums text-zinc-100 sm:text-right">
                     {a.value}
