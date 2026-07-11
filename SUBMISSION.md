@@ -10,7 +10,7 @@ RenaissLens answers the one question every Renaiss gacha player has before rippi
 
 ## Demo video
 
-_**TODO(user): paste your recording link here before submitting.**_
+**<https://youtu.be/FGXSA1rTzK0>** (2:22)
 
 ## Live URL
 
