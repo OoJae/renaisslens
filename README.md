@@ -56,7 +56,7 @@ Live deployment, real data — every metric carries its own scrape timestamp.
 
 ## Demo video
 
-_**TODO: link goes here before submission.**_
+_**https://youtu.be/FGXSA1rTzK0**_
 
 ## Deployment
 
